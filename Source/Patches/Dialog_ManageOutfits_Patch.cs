@@ -23,8 +23,7 @@ namespace Outfitted
         static void Postfix(Rect inRect, Outfit ___selOutfitInt)
         {
             var selectedOutfit = ___selOutfitInt as ExtendedOutfit;
-            if (selectedOutfit == null)
-            {
+            if (selectedOutfit == null) {
                 return;
             }
 
@@ -35,6 +34,14 @@ namespace Outfitted
             DrawTemperatureStats(selectedOutfit, ref cur, canvas);
             cur.y += VerticalMargin;
             DrawApparelStats(selectedOutfit, cur, canvas);
+
+            if (GUI.changed) {
+                var affected = Find.CurrentMap.mapPawns.FreeColonists
+                                   .Where(i => i.outfits.CurrentOutfit == selectedOutfit);
+                foreach (var pawn in affected) {
+                    pawn.mindState?.Notify_OutfitChanged();
+                }
+            }
 
             GUI.EndGroup();
 
