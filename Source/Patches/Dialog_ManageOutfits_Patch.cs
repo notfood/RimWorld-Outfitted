@@ -11,9 +11,13 @@ namespace Outfitted
     [HarmonyPatch(typeof(Dialog_ManageOutfits), nameof(Dialog_ManageOutfits.DoWindowContents))]
     static class Dialog_ManageOutfits_DoWindowContents_Patch
     {
-        const float VerticalMargin = 10f;
-        const float LeftMargin = 320f;
-        const float RightMargin = 20f;
+        const float marginVertical = 10f;
+
+        const float marginLeft = 320f;
+        const float marginRight = 10f;
+        const float marginTop = 10f;
+        const float marginBottom = 55f;
+
         const float MaxValue = 2.5f;
 
         static readonly FloatRange MinMaxTemperatureRange = new FloatRange(-100, 100);
@@ -27,12 +31,20 @@ namespace Outfitted
                 return;
             }
 
-            Rect canvas = new Rect(LeftMargin, Dialog_ManageOutfits.TopAreaHeight, inRect.xMax - LeftMargin, inRect.yMax - RightMargin);
+            Rect canvas = new Rect(
+                marginLeft,
+                Dialog_ManageOutfits.TopAreaHeight + marginTop,
+                inRect.xMax - marginLeft - marginRight,
+                inRect.yMax - Dialog_ManageOutfits.TopAreaHeight - marginTop - marginBottom
+            );
+
             GUI.BeginGroup(canvas);
             Vector2 cur = Vector2.zero;
 
+            DrawDeadmanToogle(selectedOutfit, cur, canvas);
+            cur.y += marginVertical * 2;
             DrawTemperatureStats(selectedOutfit, ref cur, canvas);
-            cur.y += VerticalMargin;
+            cur.y += marginVertical;
             DrawApparelStats(selectedOutfit, cur, canvas);
 
             if (GUI.changed) {
@@ -47,6 +59,18 @@ namespace Outfitted
 
             GUI.color = Color.white;
             Text.Anchor = TextAnchor.UpperLeft;
+        }
+
+        static void DrawDeadmanToogle(ExtendedOutfit selectedOutfit, Vector2 cur, Rect canvas)
+        {
+            Rect labelRect = new Rect(cur.x, cur.y, canvas.width, 30f);
+            Rect buttonRect = new Rect(cur.x + canvas.width - 20f, cur.y + 3f, 16f, 16f);
+
+            Widgets.Label(labelRect, ResourceBank.Strings.PenaltyWornByCorpse);
+
+            Widgets.Checkbox(buttonRect.position, ref selectedOutfit.PenaltyWornByCorpse);
+
+            TooltipHandler.TipRegion(buttonRect, ResourceBank.Strings.PenaltyWornByCorpseTooltip);
         }
 
         static void DrawTemperatureStats(ExtendedOutfit selectedOutfit, ref Vector2 cur, Rect canvas)
@@ -64,11 +88,11 @@ namespace Outfitted
             GUI.color = Color.white;
 
             // some padding
-            cur.y += VerticalMargin;
+            cur.y += marginVertical;
 
             // temperature slider
             Rect sliderRect = new Rect(cur.x, cur.y, canvas.width - 20f, 40f);
-            Rect tempResetRect = new Rect(sliderRect.xMax + 4f, cur.y + VerticalMargin, 16f, 16f);
+            Rect tempResetRect = new Rect(sliderRect.xMax + 4f, cur.y + marginVertical, 16f, 16f);
             cur.y += 40f; // includes padding
 
             FloatRange targetTemps;
@@ -113,7 +137,7 @@ namespace Outfitted
             Text.Anchor = TextAnchor.UpperLeft;
 
             // add button
-            Rect addStatRect = new Rect(statsHeaderRect.xMax - 16f, statsHeaderRect.yMin + VerticalMargin, 16f, 16f);
+            Rect addStatRect = new Rect(statsHeaderRect.xMax - 16f, statsHeaderRect.yMin + marginVertical, 16f, 16f);
             if (Widgets.ButtonImage(addStatRect, ResourceBank.Textures.AddButton))
             {
                 var options = new List<FloatMenuOption>();
@@ -121,7 +145,7 @@ namespace Outfitted
                 {
                     FloatMenuOption option = new FloatMenuOption(def.LabelCap, delegate
                     {
-                        selectedOutfit.AddStatPriority(def, 0f, StatAssignment.Manual);
+                        selectedOutfit.AddStatPriority(def, 0f);
                     });
                     options.Add(option);
                 }
@@ -137,11 +161,17 @@ namespace Outfitted
             GUI.color = Color.white;
 
             // some padding
-            cur.y += VerticalMargin;
+            cur.y += marginVertical;
+
+            var stats = selectedOutfit.StatPriorities.ToList();
 
             // main content in scrolling view
             Rect contentRect = new Rect(cur.x, cur.y, canvas.width, canvas.height - cur.y);
-            Rect viewRect = contentRect;
+            Rect viewRect = new Rect(contentRect)
+            {
+                height = 30f * stats.Count
+            };
+
             if (viewRect.height > contentRect.height)
             {
                 viewRect.width -= 20f;
@@ -153,7 +183,7 @@ namespace Outfitted
             cur = Vector2.zero;
 
             // none label
-            if (selectedOutfit.StatPriorities.Any())
+            if (stats.Count > 0)
             {
                 // legend kind of thingy.
                 Rect legendRect = new Rect(cur.x + (viewRect.width - 24) / 2, cur.y, (viewRect.width - 24) / 2, 20f);
@@ -169,7 +199,7 @@ namespace Outfitted
                 cur.y += 15f;
 
                 // statPriority weight sliders
-                foreach (var stat in selectedOutfit.StatPriorities.ToList())
+                foreach (var stat in stats)
                 {
                     DrawStatRow(selectedOutfit, stat, ref cur, viewRect.width);
                 }
@@ -201,7 +231,7 @@ namespace Outfitted
                             ? GameFont.Tiny
                             : GameFont.Small;
 
-            GUI.color = AssigmentColor(statPriority.Assignment);
+            GUI.color = AssigmentColor(statPriority);
 
             Widgets.Label(labelRect, statPriority.Stat.LabelCap);
             Text.Font = GameFont.Small;
@@ -209,7 +239,7 @@ namespace Outfitted
             // draw button
             // if manually added, delete the priority
             string buttonTooltip = string.Empty;
-            if (statPriority.Assignment == StatAssignment.Manual)
+            if (statPriority.IsManual)
             {
                 buttonTooltip = ResourceBank.Strings.StatPriorityDelete(statPriority.Stat.LabelCap);
                 if (Widgets.ButtonImage(buttonRect, ResourceBank.Textures.DeleteButton))
@@ -217,15 +247,13 @@ namespace Outfitted
                     selectedOutfit.RemoveStatPriority(statPriority.Stat);
                 }
             }
-
             // if overridden auto assignment, reset to auto
-            if (statPriority.Assignment == StatAssignment.Override)
+            else if (statPriority.IsOverride)
             {
                 buttonTooltip = ResourceBank.Strings.StatPriorityReset(statPriority.Stat.LabelCap);
                 if (Widgets.ButtonImage(buttonRect, ResourceBank.Textures.ResetButton))
                 {
-                    statPriority.Weight = 1f;
-                    statPriority.Assignment = StatAssignment.Automatic;
+                    statPriority.Weight = statPriority.Default;
                 }
             }
 
@@ -237,18 +265,13 @@ namespace Outfitted
             }
 
             // draw slider
-            GUI.color = AssigmentColor(statPriority.Assignment);
+            GUI.color = AssigmentColor(statPriority);
 
             float weight = GUI.HorizontalSlider(sliderRect, statPriority.Weight, -MaxValue, MaxValue);
 
             if (Mathf.Abs(weight - statPriority.Weight) > 1e-4)
             {
                 statPriority.Weight = weight;
-                if (statPriority.Assignment == StatAssignment.Automatic ||
-                    statPriority.Assignment == StatAssignment.Individual)
-                {
-                    statPriority.Assignment = StatAssignment.Override;
-                }
             }
 
             GUI.color = Color.white;
@@ -266,25 +289,21 @@ namespace Outfitted
             cur.y += 30f;
         }
 
-        static Color AssigmentColor(StatAssignment assigment)
+        static Color AssigmentColor(StatPriority statPriority)
         {
-            switch (assigment)
-            {
-                case StatAssignment.Automatic:
-                    return Color.grey;
-
-                case StatAssignment.Individual:
-                    return Color.cyan;
-
-                case StatAssignment.Manual:
-                    return Color.white;
-
-                case StatAssignment.Override:
-                    return new Color(0.75f, 0.69f, 0.33f);
-
-                default:
-                    return Color.white;
+            if (statPriority.IsManual) {
+                return Color.white;
             }
+
+            if (statPriority.IsDefault) {
+                return Color.grey;
+            }
+
+            if (statPriority.IsOverride) {
+                return new Color(0.75f, 0.69f, 0.33f);
+            }
+
+            return Color.cyan;
         }
     }
 }

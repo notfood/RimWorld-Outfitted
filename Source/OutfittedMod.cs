@@ -40,13 +40,13 @@ namespace Outfitted
             }
         };
 
-        static readonly SimpleCurve InsulationColdScoreFactorCurve_NeedWarm = new SimpleCurve {
+        static readonly SimpleCurve InsulationTemperatureScoreFactorCurve_Need = new SimpleCurve {
             {
                 new CurvePoint (0f, 1f),
                 true
             },
             {
-                new CurvePoint (30f, 8f),
+                new CurvePoint (30f, 4f),
                 true
             }
         };
@@ -77,7 +77,7 @@ namespace Outfitted
 
             score *= ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
 
-            if (apparel.WornByCorpse && (pawn == null || ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel)))
+            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && (pawn == null || ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel)))
             {
                 score -= 0.5f;
                 if (score > 0f)
@@ -85,6 +85,7 @@ namespace Outfitted
                     score *= 0.1f;
                 }
             }
+
             if (apparel.Stuff == ThingDefOf.Human.race.leatherDef)
             {
                 if (pawn == null || ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelSad))
@@ -106,7 +107,7 @@ namespace Outfitted
 
         static float ApparelScoreRawPriorities(Pawn pawn, Apparel apparel, ExtendedOutfit outfit)
         {
-            if (outfit.StatPriorities.Count() == 0) {
+            if (!outfit.StatPriorities.Any()) {
                 return 0f;
             }
 
@@ -114,7 +115,7 @@ namespace Outfitted
                          .Select(sp => new
                          {
                              weight = sp.Weight,
-                             value = apparel.GetStatValue(sp.Stat, true),
+                             value = apparel.def.equippedStatOffsets.GetStatOffsetFromList(sp.Stat) + apparel.GetStatValue(sp.Stat),
                              def = sp.Stat.defaultBaseValue,
                          })
                          .Average(sp => (Math.Abs(sp.def) < 0.001f ? sp.value : (sp.value - sp.def)/sp.def) * Mathf.Pow(sp.weight, 3));
@@ -122,7 +123,7 @@ namespace Outfitted
 
         static float ApparelScoreRawInsulation(Pawn pawn, Apparel apparel, ExtendedOutfit outfit, NeededWarmth neededWarmth)
         {
-            float insulation = 1f;
+            float insulation;
 
             if (outfit.targetTemperaturesOverride)
             {
@@ -207,10 +208,20 @@ namespace Outfitted
             }
             else
             {
+                float statValue;
                 if (neededWarmth == NeededWarmth.Warm)
                 {
-                    float statValue = apparel.GetStatValue(StatDefOf.Insulation_Cold, true);
-                    insulation *= InsulationColdScoreFactorCurve_NeedWarm.Evaluate(statValue);
+                    statValue = apparel.GetStatValue(StatDefOf.Insulation_Cold, true);
+                    insulation = InsulationTemperatureScoreFactorCurve_Need.Evaluate(statValue);
+                }
+                else if (neededWarmth == NeededWarmth.Cool)
+                {
+                    statValue = apparel.GetStatValue(StatDefOf.Insulation_Heat, true);
+                    insulation = InsulationTemperatureScoreFactorCurve_Need.Evaluate(statValue);
+                }
+                else
+                {
+                    insulation = 1f;
                 }
             }
             return insulation;

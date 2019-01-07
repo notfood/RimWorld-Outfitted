@@ -335,7 +335,7 @@ namespace Outfitted.Database
                 Log.ErrorOnce("Outfitted :: Can't configure, not an ExtendedOutfit", 128848);
                 return;
             }
-            extendedOutfit.AddRange(priorities.Select(i => new StatPriority(i.Key, i.Value, StatAssignment.Automatic)));
+            extendedOutfit.AddRange(priorities.Select(i => new StatPriority(i.Key, i.Value, i.Value)));
         }
     }
 }

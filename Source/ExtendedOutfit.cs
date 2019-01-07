@@ -11,6 +11,8 @@ namespace Outfitted
         public bool targetTemperaturesOverride;
         public FloatRange targetTemperatures = new FloatRange(-100, 100);
 
+        public bool PenaltyWornByCorpse = true;
+
         static IEnumerable<StatCategoryDef> blacklistedCategories = new List<StatCategoryDef>()
         {
             StatCategoryDefOf.BasicsNonPawn,
@@ -37,6 +39,7 @@ namespace Outfitted
             .Except(StatPriorities.Select(i => i.Stat));
 
         List<StatPriority> statPriorities = new List<StatPriority>();
+
         public IEnumerable<StatPriority> StatPriorities => statPriorities;
 
         public ExtendedOutfit(int uniqueId, string label) : base(uniqueId, label)
@@ -44,19 +47,21 @@ namespace Outfitted
             // Used by OutfitDatabase_MakeNewOutfit_Patch
         }
 
-        public ExtendedOutfit(Outfit outfit) : base(outfit.uniqueId, outfit.label) {
+        public ExtendedOutfit(Outfit outfit) : base(outfit.uniqueId, outfit.label)
+        {
             // Used by OutfitDatabase_ExposeData_Patch
 
             filter.CopyAllowancesFrom(outfit.filter);
         }
 
-        public ExtendedOutfit() {
+        public ExtendedOutfit()
+        {
             // Used by ExposeData
         }
 
-        public void AddStatPriority(StatDef def, float priority, StatAssignment assigment = StatAssignment.Automatic)
+        public void AddStatPriority(StatDef def, float priority, float defaultPriority = float.NaN)
         {
-            statPriorities.Insert(0, new StatPriority(def, priority, assigment));
+            statPriorities.Insert(0, new StatPriority(def, priority, defaultPriority));
         }
 
         public void AddRange(IEnumerable<StatPriority> priorities) {
@@ -75,7 +80,9 @@ namespace Outfitted
             Scribe_Deep.Look(ref filter, "filter", new object[0]);
             Scribe_Values.Look(ref targetTemperaturesOverride, "targetTemperaturesOverride");
             Scribe_Values.Look(ref targetTemperatures, "targetTemperatures");
+            Scribe_Values.Look(ref PenaltyWornByCorpse, "PenaltyWornByCorpse", true);
             Scribe_Collections.Look(ref statPriorities, "statPriorities", LookMode.Deep);
         }
+
     }
 }

@@ -1,8 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+  <PenaltyWornByCorpse>Penalty Worn by Corpse</PenaltyWornByCorpse>
+  <PenaltyWornByCorpseTooltip>Should Worn by Corpse matter in calculations?</PenaltyWornByCorpseTooltip>
+  
   <PreferedTemperature>Temperature range</PreferedTemperature>
   <TemperatureRangeReset>Reset temperature range to seasonal temperature</TemperatureRangeReset>
+  
   <PreferedStats>Stat priorities</PreferedStats>
   
   <StatPriorityAdd>Add new priority</StatPriorityAdd>

@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Verse;
 
 namespace Outfitted
@@ -7,7 +6,8 @@ namespace Outfitted
     public static class ResourceBank
     {
         [StaticConstructorOnStartup]
-        public static class Textures {
+        public static class Textures
+        {
             public static readonly Texture2D AddButton = ContentFinder<Texture2D>.Get("add");
 
             public static readonly Texture2D BgColor = SolidColorMaterials.NewSolidColorTexture(new Color(0.2f, 0.2f, 0.2f, 1));
@@ -27,7 +27,8 @@ namespace Outfitted
             public static readonly Texture2D ShirtBasic = ContentFinder<Texture2D>.Get("Things/Pawn/Humanlike/Apparel/ShirtBasic/ShirtBasic");
         }
 
-        public static class Strings {
+        public static class Strings
+        {
             static string TL(string s) => (s).Translate();
             static string TL(string s, string arg) => (s).Translate(arg);
 
@@ -38,6 +39,8 @@ namespace Outfitted
             public static readonly string None = TL("None");
 
             public static readonly string OutfitShow = TL("OutfitShow");
+            public static readonly string PenaltyWornByCorpse = TL("PenaltyWornByCorpse");
+            public static readonly string PenaltyWornByCorpseTooltip = TL("PenaltyWornByCorpseTooltip");
 
             public static string StatPriorityDelete(string labelCap) => TL("StatPriorityDelete", labelCap);
             public static string StatPriorityReset(string labelCap) => TL("StatPriorityReset", labelCap);
