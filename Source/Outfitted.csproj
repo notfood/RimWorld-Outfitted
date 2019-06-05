@@ -39,6 +39,9 @@
     <Reference Include="0Harmony">
       <HintPath>packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="0UnofficialMultiplayerAPI">
+      <HintPath>..\Dlls\0UnofficialMultiplayerAPI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="OutfittedMod.cs" />
@@ -52,6 +55,7 @@
     <Compile Include="Widgets\Widgets_FloatRange.cs" />
     <Compile Include="Patches\Thing_DrawGUIOverlay_Patch.cs" />
     <Compile Include="Patches\PlaySettings_DoPlaySettingsGlobalControls_Patch.cs" />
+    <Compile Include="Multiplayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -4,6 +4,7 @@ using System.Linq;
 using Harmony;
 using RimWorld;
 using UnityEngine;
+using UnofficialMultiplayerAPI;
 using Verse;
 
 namespace Outfitted
@@ -41,13 +42,20 @@ namespace Outfitted
             GUI.BeginGroup(canvas);
             Vector2 cur = Vector2.zero;
 
-            DrawDeadmanToogle(selectedOutfit, cur, canvas);
+            if (MPApi.IsInMultiplayer) {
+                MPApi.FieldWatchPrefix ();
+
+                ExtendedOutfitProxy.Watch (ref selectedOutfit);
+            }
+            DrawDeadmanToogle (selectedOutfit, cur, canvas);
             cur.y += marginVertical * 2;
             DrawTemperatureStats(selectedOutfit, ref cur, canvas);
             cur.y += marginVertical;
             DrawApparelStats(selectedOutfit, cur, canvas);
 
-            if (GUI.changed) {
+            if (MPApi.IsInMultiplayer) {
+                MPApi.FieldWatchPostfix ();
+            } else if (GUI.changed) {
                 var affected = Find.CurrentMap.mapPawns.FreeColonists
                                    .Where(i => i.outfits.CurrentOutfit == selectedOutfit);
                 foreach (var pawn in affected) {
@@ -254,6 +262,10 @@ namespace Outfitted
                 if (Widgets.ButtonImage(buttonRect, ResourceBank.Textures.ResetButton))
                 {
                     statPriority.Weight = statPriority.Default;
+
+                    if (MPApi.IsInMultiplayer) {
+                        ExtendedOutfitProxy.SetStatPriority (statPriority.Stat, statPriority.Default);
+                    }
                 }
             }
 
@@ -272,6 +284,10 @@ namespace Outfitted
             if (Mathf.Abs(weight - statPriority.Weight) > 1e-4)
             {
                 statPriority.Weight = weight;
+
+                if (MPApi.IsInMultiplayer) {
+                    ExtendedOutfitProxy.SetStatPriority (statPriority.Stat, weight);
+                }
             }
 
             GUI.color = Color.white;
