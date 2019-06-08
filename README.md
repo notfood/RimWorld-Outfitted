@@ -9,6 +9,8 @@ Outfit management
 Finetune the assigned apparel sets with any Stat under the assigments tab.
 Includes an overlay to see all apparel scores for the selected colonist.
 
+Multiplayer enabled!
+
 ## F.A.Q.
 ### Can I install this on existing colonies?
 Yes, you can use Outfitted with your ongoing game. It'll import your outfits to the new format.

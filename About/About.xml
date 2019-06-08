@@ -2,7 +2,7 @@
 <ModMetaData>
   <name>Outfitted</name>
   <author>notfood</author>
-  <targetVersion>1.0.2096</targetVersion>
+  <supportedVersions><li>1.0</li></supportedVersions>
   <description>
     Outfit management
     
@@ -13,6 +13,7 @@
     - Killface
     - Fluffy
     - Soulkata
-    
+
+    Multiplayer enabled!
   </description>
 </ModMetaData>
