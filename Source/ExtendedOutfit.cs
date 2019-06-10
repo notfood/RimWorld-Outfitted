@@ -11,6 +11,7 @@ namespace Outfitted
         public bool targetTemperaturesOverride;
         public FloatRange targetTemperatures = new FloatRange(-100, 100);
 
+        [Multiplayer.API.SyncField]
         public bool PenaltyWornByCorpse = true;
 
         static IEnumerable<StatCategoryDef> blacklistedCategories = new List<StatCategoryDef>()
@@ -59,7 +60,7 @@ namespace Outfitted
             // Used by ExposeData
         }
 
-        [UnofficialMultiplayerAPI.SyncMethod]
+        [Multiplayer.API.SyncMethod]
         public void AddStatPriority(StatDef def, float priority, float defaultPriority = float.NaN)
         {
             statPriorities.Insert(0, new StatPriority(def, priority, defaultPriority));
@@ -69,7 +70,6 @@ namespace Outfitted
             statPriorities.AddRange(priorities);
         }
 
-        [UnofficialMultiplayerAPI.SyncMethod]
         public void RemoveStatPriority(StatDef def)
         {
             statPriorities.RemoveAll(i => i.Stat == def);

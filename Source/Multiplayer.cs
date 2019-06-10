@@ -1,47 +1,43 @@
-﻿using System;
+using System;
 using System.Linq;
 using RimWorld;
-using UnofficialMultiplayerAPI;
+using Multiplayer.API;
 using Verse;
 
 namespace Outfitted
 {
-    public class ExtendedOutfitProxy : IMultiplayerInit
+    [StaticConstructorOnStartup]
+    public static class ExtendedOutfitProxy
     {
         static ISyncField targetTemperaturesOverride;
         static ISyncField targetTemperatures;
-        static ISyncField PenaltyWornByCorpse;
+        //static ISyncField PenaltyWornByCorpse;
         static ISyncField selectedStatPrioritySF;
         static ISyncField AutoWorkPriorities;
 
         static int selectedOutfitId;
         static StatPriority selectedStatPriority;
 
-        public void Init ()
+        static ExtendedOutfitProxy()
         {
-            targetTemperaturesOverride = SyncField (typeof (ExtendedOutfit), "targetTemperaturesOverride");
-            targetTemperatures = SyncField (typeof (ExtendedOutfit), "targetTemperatures");
-            PenaltyWornByCorpse = SyncField (typeof (ExtendedOutfit), "PenaltyWornByCorpse");
-            AutoWorkPriorities = SyncField( typeof( ExtendedOutfit ), "AutoWorkPriorities" );
-            selectedStatPrioritySF = SyncField (typeof (ExtendedOutfitProxy), "selectedStatPriority");
+            if (!MP.enabled) return;
+
+            targetTemperaturesOverride = RegisterSyncField (typeof (ExtendedOutfit), "targetTemperaturesOverride");
+            targetTemperatures = RegisterSyncField (typeof (ExtendedOutfit), "targetTemperatures");
+            AutoWorkPriorities = RegisterSyncField (typeof(ExtendedOutfit), "AutoWorkPriorities");
+
+            // Static Types require a null target and "Type/Field" format for the name.
+            selectedStatPrioritySF = RegisterSyncField (null, typeof (ExtendedOutfitProxy) + "/selectedStatPriority");
+
+            MP.RegisterSyncMethod(typeof(ExtendedOutfit), "RemoveStatPriority");
         }
 
-        static ISyncField SyncField (Type type, string member)
+        static ISyncField RegisterSyncField(Type type, string method)
         {
-            return MPApi.SyncField (type, member).SetBufferChanges ();
+            return MP.RegisterSyncField(type, method).SetBufferChanges();
         }
 
-        // workaround until MPApi allows null Watches
-        static readonly ExtendedOutfitProxy Instance = new ExtendedOutfitProxy ();
-        [Syncer (shouldConstruct = false)]
-        static void ProxySyncer (SyncWorker sync, ref ExtendedOutfitProxy proxy)
-        {
-            if (!sync.isWriting) {
-                proxy = Instance;
-            }
-        }
-
-        [Syncer (shouldConstruct = false)]
+        [SyncWorker(shouldConstruct = false)]
         static void ExtendedOutfitSyncer (SyncWorker sync, ref ExtendedOutfit outfit)
         {
             if (sync.isWriting) {
@@ -58,7 +54,7 @@ namespace Outfitted
             }
         }
 
-        [Syncer (shouldConstruct = false)]
+        [SyncWorker(shouldConstruct = false)]
         static void StatPrioritySyncer (SyncWorker sync, ref StatPriority sp)
         {
             int uid = selectedOutfitId;
@@ -99,9 +95,10 @@ namespace Outfitted
 
             targetTemperaturesOverride.Watch (outfit);
             targetTemperatures.Watch (outfit);
-            PenaltyWornByCorpse.Watch (outfit);
+            //PenaltyWornByCorpse.Watch (outfit);
+            MP.Watch(outfit, nameof(ExtendedOutfit.PenaltyWornByCorpse));
             AutoWorkPriorities.Watch( outfit );
-            selectedStatPrioritySF.Watch (Instance);
+            selectedStatPrioritySF.Watch ();
         }
 
         public static void SetStatPriority (StatDef stat, float weight)
