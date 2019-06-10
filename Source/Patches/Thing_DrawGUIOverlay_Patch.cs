@@ -39,11 +39,11 @@ namespace Outfitted
                 return;
             }
 
-            float score = OutfittedMod.ApparelScoreRaw(pawn, apparel) * 10;
+            float score = JobGiver_OptimizeApparel.ApparelScoreGain( pawn, apparel );
             if (Math.Abs(score) > 0.01f)
             {
                 var pos = GenMapUI.LabelDrawPosFor(apparel, 0f);
-                GenMapUI.DrawThingLabel(pos, score.ToString("F1"), BeautyDrawer.BeautyColor(score, 8f));
+                GenMapUI.DrawThingLabel(pos, score.ToString("F1"), BeautyDrawer.BeautyColor(score, 3f));
             }
         }
     }

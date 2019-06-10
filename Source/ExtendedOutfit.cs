@@ -30,12 +30,12 @@ namespace Outfitted
             StatDefOf.StuffEffectMultiplierArmor,
         };
 
-        static IEnumerable<StatDef> AllAvailableStats => DefDatabase<StatDef>
+        internal static IEnumerable<StatDef> AllAvailableStats => DefDatabase<StatDef>
             .AllDefs
             .Where(i => !blacklistedCategories.Contains(i.category))
             .Except(blacklistedStats).ToList();
 
-        public IEnumerable<StatDef> UnnasignedStats => AllAvailableStats
+        public IEnumerable<StatDef> UnassignedStats => AllAvailableStats
             .Except(StatPriorities.Select(i => i.Stat));
 
         List<StatPriority> statPriorities = new List<StatPriority>();
@@ -75,6 +75,8 @@ namespace Outfitted
             statPriorities.RemoveAll(i => i.Stat == def);
         }
 
+        public bool AutoWorkPriorities;
+
         new public void ExposeData()
         {
             Scribe_Values.Look(ref uniqueId, "uniqueId");
@@ -84,7 +86,7 @@ namespace Outfitted
             Scribe_Values.Look(ref targetTemperatures, "targetTemperatures");
             Scribe_Values.Look(ref PenaltyWornByCorpse, "PenaltyWornByCorpse", true);
             Scribe_Collections.Look(ref statPriorities, "statPriorities", LookMode.Deep);
+            Scribe_Values.Look(ref AutoWorkPriorities, "AutoWorkPriorities", false );
         }
-
     }
 }

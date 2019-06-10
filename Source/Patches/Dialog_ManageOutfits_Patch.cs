@@ -47,8 +47,8 @@ namespace Outfitted
 
                 ExtendedOutfitProxy.Watch (ref selectedOutfit);
             }
-            DrawDeadmanToogle (selectedOutfit, cur, canvas);
-            cur.y += marginVertical * 2;
+            DrawDeadmanToogle (selectedOutfit, ref cur, canvas);
+            DrawAutoWorkPrioritiesToggle( selectedOutfit, ref cur, canvas );
             DrawTemperatureStats(selectedOutfit, ref cur, canvas);
             cur.y += marginVertical;
             DrawApparelStats(selectedOutfit, cur, canvas);
@@ -69,16 +69,22 @@ namespace Outfitted
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
-        static void DrawDeadmanToogle(ExtendedOutfit selectedOutfit, Vector2 cur, Rect canvas)
+        static void DrawDeadmanToogle(ExtendedOutfit selectedOutfit, ref Vector2 cur, Rect canvas)
         {
-            Rect labelRect = new Rect(cur.x, cur.y, canvas.width, 30f);
-            Rect buttonRect = new Rect(cur.x + canvas.width - 20f, cur.y + 3f, 16f, 16f);
+            Rect rect = new Rect(cur.x, cur.y, canvas.width, 30f);
+            Widgets.CheckboxLabeled( rect, ResourceBank.Strings.PenaltyWornByCorpse,
+                                     ref selectedOutfit.PenaltyWornByCorpse );
+            TooltipHandler.TipRegion( rect, ResourceBank.Strings.PenaltyWornByCorpseTooltip);
+            cur.y += rect.height;
+        }
 
-            Widgets.Label(labelRect, ResourceBank.Strings.PenaltyWornByCorpse);
-
-            Widgets.Checkbox(buttonRect.position, ref selectedOutfit.PenaltyWornByCorpse);
-
-            TooltipHandler.TipRegion(buttonRect, ResourceBank.Strings.PenaltyWornByCorpseTooltip);
+        static void DrawAutoWorkPrioritiesToggle( ExtendedOutfit outfit, ref Vector2 pos, Rect canvas )
+        {
+            Rect rect = new Rect( pos.x, pos.y, canvas.width, 30f );
+            Widgets.CheckboxLabeled( rect, ResourceBank.Strings.AutoWorkPriorities,
+                                     ref outfit.AutoWorkPriorities );
+            TooltipHandler.TipRegion( rect, ResourceBank.Strings.AutoWorkPrioritiesTooltip );
+            pos.y += rect.height;
         }
 
         static void DrawTemperatureStats(ExtendedOutfit selectedOutfit, ref Vector2 cur, Rect canvas)
@@ -149,7 +155,7 @@ namespace Outfitted
             if (Widgets.ButtonImage(addStatRect, ResourceBank.Textures.AddButton))
             {
                 var options = new List<FloatMenuOption>();
-                foreach (var def in selectedOutfit.UnnasignedStats.OrderBy(i => i.label).OrderBy(i => i.category.displayOrder))
+                foreach (var def in selectedOutfit.UnassignedStats.OrderBy(i => i.label).OrderBy(i => i.category.displayOrder))
                 {
                     FloatMenuOption option = new FloatMenuOption(def.LabelCap, delegate
                     {
