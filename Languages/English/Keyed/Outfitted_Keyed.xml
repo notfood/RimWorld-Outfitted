@@ -3,6 +3,9 @@
 
   <PenaltyWornByCorpse>Penalty Worn by Corpse</PenaltyWornByCorpse>
   <PenaltyWornByCorpseTooltip>Should Worn by Corpse matter in calculations?</PenaltyWornByCorpseTooltip>
+
+  <AutoWorkPriorities>Automatic Work Priorities</AutoWorkPriorities>
+  <AutoWorkPrioritiesTooltip>If enabled, automatically adds weights for stats that are relevant to the assigned work types.</AutoWorkPrioritiesTooltip>
   
   <PreferedTemperature>Temperature range</PreferedTemperature>
   <TemperatureRangeReset>Reset temperature range to seasonal temperature</TemperatureRangeReset>
