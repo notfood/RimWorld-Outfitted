@@ -12,6 +12,7 @@ namespace Outfitted
         static ISyncField targetTemperatures;
         static ISyncField PenaltyWornByCorpse;
         static ISyncField selectedStatPrioritySF;
+        static ISyncField AutoWorkPriorities;
 
         static int selectedOutfitId;
         static StatPriority selectedStatPriority;
@@ -21,12 +22,13 @@ namespace Outfitted
             targetTemperaturesOverride = SyncField (typeof (ExtendedOutfit), "targetTemperaturesOverride");
             targetTemperatures = SyncField (typeof (ExtendedOutfit), "targetTemperatures");
             PenaltyWornByCorpse = SyncField (typeof (ExtendedOutfit), "PenaltyWornByCorpse");
+            AutoWorkPriorities = SyncField( typeof( ExtendedOutfit ), "AutoWorkPriorities" );
             selectedStatPrioritySF = SyncField (typeof (ExtendedOutfitProxy), "selectedStatPriority");
         }
 
-        static ISyncField SyncField (Type type, string method)
+        static ISyncField SyncField (Type type, string member)
         {
-            return MPApi.SyncField (type, method).SetBufferChanges ();
+            return MPApi.SyncField (type, member).SetBufferChanges ();
         }
 
         // workaround until MPApi allows null Watches
@@ -98,6 +100,7 @@ namespace Outfitted
             targetTemperaturesOverride.Watch (outfit);
             targetTemperatures.Watch (outfit);
             PenaltyWornByCorpse.Watch (outfit);
+            AutoWorkPriorities.Watch( outfit );
             selectedStatPrioritySF.Watch (Instance);
         }
 

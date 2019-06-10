@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Harmony;
 using RimWorld;
@@ -17,44 +17,27 @@ namespace Outfitted
             HarmonyInstance.Create("rimworld.outfitted").PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
         }
 
-        static readonly SimpleCurve HitPointsPercentScoreFactorCurve = new SimpleCurve {
-            {
-                new CurvePoint (0f, 0f),
-                true
-            },
-            {
-                new CurvePoint (0.2f, 0.2f),
-                true
-            },
-            {
-                new CurvePoint (0.22f, 0.6f),
-                true
-            },
-            {
-                new CurvePoint (0.5f, 0.6f),
-                true
-            },
-            {
-                new CurvePoint (0.52f, 1f),
-                true
-            }
+        private static readonly SimpleCurve HitPointsPercentScoreFactorCurve = new SimpleCurve
+        {
+            new CurvePoint( 0f, 0f ),
+            new CurvePoint( 0.2f, 0.2f ),
+            new CurvePoint( 0.22f, 0.6f ),
+            new CurvePoint( 0.5f, 0.6f ),
+            new CurvePoint( 0.52f, 1f ),
         };
 
-        static readonly SimpleCurve InsulationTemperatureScoreFactorCurve_Need = new SimpleCurve {
-            {
-                new CurvePoint (0f, 1f),
-                true
-            },
-            {
-                new CurvePoint (30f, 4f),
-                true
-            }
+        private static readonly SimpleCurve InsulationTemperatureScoreFactorCurve_Need = new SimpleCurve
+        {
+            new CurvePoint( 0f, 1f ),
+            new CurvePoint( 30f, 4f ),
         };
 
-        static readonly SimpleCurve InsulationFactorCurve = new SimpleCurve {
-            new CurvePoint(-5f, 0.1f),
-            new CurvePoint(0f, 1f),
-            new CurvePoint(100f, 4f)
+        private static readonly SimpleCurve InsulationFactorCurve = new SimpleCurve
+        {
+            new CurvePoint( -20f, -3f ),
+            new CurvePoint( -10f, -2f ),
+            new CurvePoint( 10f, 2f ),
+            new CurvePoint( 20f, 3f )
         };
 
         public static float ApparelScoreRaw(Pawn pawn, Apparel apparel, NeededWarmth neededWarmth = NeededWarmth.Any)
@@ -68,6 +51,11 @@ namespace Outfitted
 
             float score = 0.1f + ApparelScoreRawPriorities(pawn, apparel, outfit);
 
+            if ( outfit.AutoWorkPriorities )
+            {
+                score += ApparelScoreAutoWorkPriorities( pawn, apparel );
+            }
+
             if (apparel.def.useHitPoints)
             {
                 float x = (float)apparel.HitPoints / apparel.MaxHitPoints;
@@ -75,9 +63,9 @@ namespace Outfitted
             }
             score += apparel.GetSpecialApparelScoreOffset();
 
-            score *= ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
+            score += ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
 
-            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && (pawn == null || ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel)))
+            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel))
             {
                 score -= 0.5f;
                 if (score > 0f)
@@ -88,7 +76,7 @@ namespace Outfitted
 
             if (apparel.Stuff == ThingDefOf.Human.race.leatherDef)
             {
-                if (pawn == null || ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelSad))
+                if (ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelSad))
                 {
                     score -= 0.5f;
                     if (score > 0f)
@@ -96,7 +84,7 @@ namespace Outfitted
                         score *= 0.1f;
                     }
                 }
-                if (pawn != null && ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelHappy))
+                if (ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelHappy))
                 {
                     score += 0.12f;
                 }
@@ -121,90 +109,71 @@ namespace Outfitted
                          .Average(sp => (Math.Abs(sp.def) < 0.001f ? sp.value : (sp.value - sp.def)/sp.def) * Mathf.Pow(sp.weight, 3));
         }
 
+        static float ApparelScoreAutoWorkPriorities( Pawn pawn, Apparel apparel )
+        {
+            return WorkPriorities.WorktypeStatPriorities( pawn )
+                                 .Select( sp => ( apparel.def.equippedStatOffsets.GetStatOffsetFromList( sp.Stat )
+                                                + apparel.GetStatValue( sp.Stat )
+                                                - sp.Stat.defaultBaseValue ) * sp.Weight )
+                                 .Sum(); // NOTE: weights were already normalized to sum to 1.
+        }
+
         static float ApparelScoreRawInsulation(Pawn pawn, Apparel apparel, ExtendedOutfit outfit, NeededWarmth neededWarmth)
         {
             float insulation;
 
             if (outfit.targetTemperaturesOverride)
             {
-                var comfortableRange = pawn.ComfortableTemperatureRange();
+                // NOTE: We can't rely on the vanilla check for taking off gear for temperature, because
+                // we need to consider all the wardrobe changes taken together; each individual change may
+                // note push us over the thresholds, but several changes together may.
+                // Return 1 for temperature offsets here, we'll look at the effects of any gear we have to 
+                // take off below.
+                // NOTE: This is still suboptimal, because we're still only considering one piece of apparel
+                // to wear at each time. A better solution would be reducing the problem to a series of linear
+                // equations, and then solving that system. 
+                // I'm not sure that's feasible at all; first off for simple computational reasons: the linear
+                // system to solve would be fairly massive, optimizing for dozens of pawns and hundreds of pieces 
+                // of gear simultaneously. Second, many of the stat functions aren't actually linear, and would
+                // have to be made to be linear.
+                if ( pawn.apparel.WornApparel.Contains( apparel ) )
+                    return 1f;
+
+                var currentRange = pawn.ComfortableTemperatureRange();
+                var candidateRange = currentRange;
                 var targetRange = outfit.targetTemperatures;
-                var insulationRange = GetInsulationStats(apparel);
+                var apparelOffset = GetInsulationStats(apparel);
 
-                if (pawn.apparel.WornApparel.Contains(apparel))
+                // effect of this piece of apparel
+                candidateRange.min += apparelOffset.min;
+                candidateRange.max += apparelOffset.max;
+                foreach (var otherApparel in pawn.apparel.WornApparel)
                 {
-                    comfortableRange.min -= insulationRange.min;
-                    comfortableRange.max -= insulationRange.max;
-                }
-                else
-                {
-                    foreach (var otherApparel in pawn.apparel.WornApparel)
+                    // effect of taking off any other apparel that is incompatible
+                    if (!ApparelUtility.CanWearTogether(apparel.def, otherApparel.def, pawn.RaceProps.body))
                     {
-                        if (!ApparelUtility.CanWearTogether(apparel.def, otherApparel.def, pawn.RaceProps.body))
-                        {
-                            var otherInsulationRange = GetInsulationStats(otherApparel);
+                        var otherInsulationRange = GetInsulationStats(otherApparel);
 
-                            comfortableRange.min -= otherInsulationRange.min;
-                            comfortableRange.max -= otherInsulationRange.max;
-                        }
+                        candidateRange.min -= otherInsulationRange.min;
+                        candidateRange.max -= otherInsulationRange.max;
                     }
                 }
 
-                FloatRange temperatureScoreOffset = new FloatRange(0f, 0f);
+                // did we get any closer to our target range? (smaller distance is better, negative values are overkill).
+                var currentDistance = new FloatRange( Mathf.Max( currentRange.min - targetRange.min, 0f ),
+                                                      Mathf.Max( targetRange.max  - currentRange.max, 0f ) );
+                var candidateDistance = new FloatRange( Mathf.Max( candidateRange.min - targetRange.min, 0f ),
+                                                        Mathf.Max( targetRange.max    - candidateRange.max, 0f ) );
 
-                // cold values are negative
-                float neededInsulationCold = targetRange.min - comfortableRange.min;
-                if (neededInsulationCold < 0)
-                {
-                    // too cold
-                    if (neededInsulationCold > insulationRange.min)
-                    {
-                        temperatureScoreOffset.min += neededInsulationCold;
-                    }
-                    else
-                    {
-                        temperatureScoreOffset.min += insulationRange.min;
-                    }
-                }
-                else
-                {
-                    // warm enough
-                    if (insulationRange.min > neededInsulationCold)
-                    {
-                        temperatureScoreOffset.min += insulationRange.min - neededInsulationCold;
-                    }
-                }
-
-                // hot values are positive
-                float neededInsulationWarmth = targetRange.max - comfortableRange.max;
-                if (neededInsulationWarmth > 0)
-                {
-                    // too hot
-                    if (neededInsulationWarmth < insulationRange.max)
-                    {
-                        temperatureScoreOffset.max += neededInsulationWarmth;
-                    }
-                    else
-                    {
-                        temperatureScoreOffset.max += insulationRange.max;
-                    }
-                }
-                else
-                {
-                    // cool enough
-                    if (insulationRange.max < neededInsulationWarmth)
-                    {
-                        temperatureScoreOffset.max += insulationRange.max - neededInsulationWarmth;
-                    }
-                }
-
-                // invert for scoring
-                temperatureScoreOffset.min *= -1;
-
-                temperatureScoreOffset.min = InsulationFactorCurve.Evaluate(temperatureScoreOffset.min);
-                temperatureScoreOffset.max = InsulationFactorCurve.Evaluate(temperatureScoreOffset.max);
-
-                insulation = temperatureScoreOffset.min * temperatureScoreOffset.max;
+                // improvement in distances
+                insulation = InsulationFactorCurve.Evaluate( currentDistance.min - candidateDistance.min ) +
+                             InsulationFactorCurve.Evaluate( currentDistance.max - candidateDistance.max );
+#if DEBUG
+                Log.Message( $"{pawn.Name.ToStringShort} :: {apparel.LabelCap}\n" +
+                             $"\ttarget range: {targetRange}, current range: {currentRange}, candidate range {candidateRange}\n" +
+                             $"\tcurrent distance: {currentDistance}, candidate distance: {candidateDistance}\n" +
+                             $"\timprovement: {(currentDistance.min - candidateDistance.min) + (currentDistance.max - candidateDistance.max)}, insulation score: {insulation}\n" );
+#endif
             }
             else
             {
@@ -232,7 +201,7 @@ namespace Outfitted
             var insulationCold = apparel.GetStatValue(StatDefOf.Insulation_Cold);
             var insulationHeat = apparel.GetStatValue(StatDefOf.Insulation_Heat);
 
-            return new FloatRange(insulationCold, insulationHeat);
+            return new FloatRange(-insulationCold, insulationHeat);
         }
     }
 }

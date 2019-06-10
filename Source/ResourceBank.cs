@@ -42,6 +42,10 @@ namespace Outfitted
             public static readonly string PenaltyWornByCorpse = TL("PenaltyWornByCorpse");
             public static readonly string PenaltyWornByCorpseTooltip = TL("PenaltyWornByCorpseTooltip");
 
+            public static readonly string AutoWorkPriorities = TL( "AutoWorkPriorities" );
+            public static readonly string AutoWorkPrioritiesTooltip = TL( "AutoWorkPrioritiesTooltip" );
+
+
             public static string StatPriorityDelete(string labelCap) => TL("StatPriorityDelete", labelCap);
             public static string StatPriorityReset(string labelCap) => TL("StatPriorityReset", labelCap);
         }
