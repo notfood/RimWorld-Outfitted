@@ -168,11 +168,12 @@ namespace Outfitted
                 // improvement in distances
                 insulation = InsulationFactorCurve.Evaluate( currentDistance.min - candidateDistance.min ) +
                              InsulationFactorCurve.Evaluate( currentDistance.max - candidateDistance.max );
-
-                Log.Message( $"{pawn.Name.ToStringShort} :: {apparel.LabelCap}\n" +
-                             $"\ttarget range: {targetRange}, current range: {currentRange}, candidate range {candidateRange}\n" +
-                             $"\tcurrent distance: {currentDistance}, candidate distance: {candidateDistance}\n" +
-                             $"\timprovement: {(currentDistance.min - candidateDistance.min) + (currentDistance.max - candidateDistance.max)}, insulation score: {insulation}\n" );
+                /**
+                 * Log.Message( $"{pawn.Name.ToStringShort} :: {apparel.LabelCap}\n" +
+                 *              $"\ttarget range: {targetRange}, current range: {currentRange}, candidate range {candidateRange}\n" +
+                 *              $"\tcurrent distance: {currentDistance}, candidate distance: {candidateDistance}\n" +
+                 *              $"\timprovement: {(currentDistance.min - candidateDistance.min) + (currentDistance.max - candidateDistance.max)}, insulation score: {insulation}\n" );
+                 */
             }
             else
             {
