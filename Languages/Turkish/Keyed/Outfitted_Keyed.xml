@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <PenaltyWornByCorpse>Ölmüş kişinin giysisi penaltısı</PenaltyWornByCorpse>
+  <PenaltyWornByCorpseTooltip>Hesaplamalarda ölmüş kişilerin giysileride hesaplanmalımı ?</PenaltyWornByCorpseTooltip>
+
+  <AutoWorkPriorities>Otomatik iş önceliği</AutoWorkPriorities>
+  <AutoWorkPrioritiesTooltip>Eğer açılırsa, otomatik olarak istatistiklere ağırlıkları ekler ve ağırlıklar çalıştığı iş tipine göre değişir.</AutoWorkPrioritiesTooltip>
+  
+  <PreferedTemperature>Tercih edilen sıcaklık</PreferedTemperature>
+  <TemperatureRangeReset>Sıcaklık aralığını mevsime uygun olarak sıfırla</TemperatureRangeReset>
+  
+  <PreferedStats>İstatistik önceliği</PreferedStats>
+  
+  <StatPriorityAdd>Yeni öncelik ekle</StatPriorityAdd>
+  <StatPriorityReset>{0} için önceliği sıfırla</StatPriorityReset>
+  <StatPriorityDelete>{0} için önceliği sil</StatPriorityDelete>
+
+  <OutfitShow>Seçilmiş kolonist için giysi skorunu açın.</OutfitShow>
+  
+  <!-- Outfits -->
+  <OutfitDoctor>Doktor</OutfitDoctor>
+  <OutfitWarden>Bekçi</OutfitWarden>
+  <OutfitHandler>Eğitici</OutfitHandler>
+  <OutfitCook>Aşçı</OutfitCook>
+  <OutfitHunter>Avcı</OutfitHunter>
+  <OutfitBuilder>Mimar</OutfitBuilder>
+  <OutfitGrower>Yetiştirici</OutfitGrower>
+  <OutfitMiner>Madenci</OutfitMiner>
+  <OutfitSmith>Demirci</OutfitSmith>
+  <OutfitTailor>Terzi</OutfitTailor>
+  <OutfitArtist>Ressam</OutfitArtist>
+  <OutfitCrafter>Üretici</OutfitCrafter>
+  <OutfitHauler>Taşıyıcı</OutfitHauler>
+  <OutfitCleaner>Temizlikçi</OutfitCleaner>
+  <OutfitResearcher>Araştırmacı</OutfitResearcher>
+  <OutfitBrawler>Kavgacı</OutfitBrawler>
+  
+</LanguageData>
