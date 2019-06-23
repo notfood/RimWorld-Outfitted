@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Harmony;
+using Multiplayer.API;
+
 using RimWorld;
 using UnityEngine;
-using UnofficialMultiplayerAPI;
 using Verse;
 
 namespace Outfitted
@@ -42,8 +44,8 @@ namespace Outfitted
             GUI.BeginGroup(canvas);
             Vector2 cur = Vector2.zero;
 
-            if (MPApi.IsInMultiplayer) {
-                MPApi.FieldWatchPrefix ();
+            if (MP.IsInMultiplayer) {
+                MP.WatchBegin ();
 
                 ExtendedOutfitProxy.Watch (ref selectedOutfit);
             }
@@ -53,8 +55,8 @@ namespace Outfitted
             cur.y += marginVertical;
             DrawApparelStats(selectedOutfit, cur, canvas);
 
-            if (MPApi.IsInMultiplayer) {
-                MPApi.FieldWatchPostfix ();
+            if (MP.IsInMultiplayer) {
+                MP.WatchEnd ();
             } else if (GUI.changed) {
                 var affected = Find.CurrentMap.mapPawns.FreeColonists
                                    .Where(i => i.outfits.CurrentOutfit == selectedOutfit);
@@ -269,8 +271,8 @@ namespace Outfitted
                 {
                     statPriority.Weight = statPriority.Default;
 
-                    if (MPApi.IsInMultiplayer) {
-                        ExtendedOutfitProxy.SetStatPriority (statPriority.Stat, statPriority.Default);
+                    if (MP.IsInMultiplayer) {
+                        ExtendedOutfitProxy.SetStatPriority (selectedOutfit.uniqueId, statPriority.Stat, statPriority.Default);
                     }
                 }
             }
@@ -291,8 +293,8 @@ namespace Outfitted
             {
                 statPriority.Weight = weight;
 
-                if (MPApi.IsInMultiplayer) {
-                    ExtendedOutfitProxy.SetStatPriority (statPriority.Stat, weight);
+                if (MP.IsInMultiplayer) {
+                    ExtendedOutfitProxy.SetStatPriority (selectedOutfit.uniqueId, statPriority.Stat, weight);
                 }
             }
 

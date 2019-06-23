@@ -1,47 +1,95 @@
-﻿using System;
+using System;
 using System.Linq;
 using RimWorld;
-using UnofficialMultiplayerAPI;
+using Multiplayer.API;
 using Verse;
 
 namespace Outfitted
 {
-    public class ExtendedOutfitProxy : IMultiplayerInit
+    [StaticConstructorOnStartup]
+    public static class ExtendedOutfitProxy
     {
-        static ISyncField targetTemperaturesOverride;
-        static ISyncField targetTemperatures;
-        static ISyncField PenaltyWornByCorpse;
-        static ISyncField selectedStatPrioritySF;
-        static ISyncField AutoWorkPriorities;
+        static readonly ISyncField[] ExtendedOutfitFields;
+        static readonly ISyncField[] ProxyFields;
 
-        static int selectedOutfitId;
-        static StatPriority selectedStatPriority;
+        static int targetOutfitId;
+        static StatDef targetStat;
+        static float targetWeight;
 
-        public void Init ()
+        static ExtendedOutfitProxy()
         {
-            targetTemperaturesOverride = SyncField (typeof (ExtendedOutfit), "targetTemperaturesOverride");
-            targetTemperatures = SyncField (typeof (ExtendedOutfit), "targetTemperatures");
-            PenaltyWornByCorpse = SyncField (typeof (ExtendedOutfit), "PenaltyWornByCorpse");
-            AutoWorkPriorities = SyncField( typeof( ExtendedOutfit ), "AutoWorkPriorities" );
-            selectedStatPrioritySF = SyncField (typeof (ExtendedOutfitProxy), "selectedStatPriority");
+            if (!MP.enabled) return;
+
+            ProxyFields = new ISyncField[] {
+                MP.RegisterSyncField(typeof(ExtendedOutfitProxy), nameof(targetWeight))
+                    .SetBufferChanges().PostApply(Update)
+            };
+
+            ExtendedOutfitFields = new ISyncField[] {
+                MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.targetTemperaturesOverride)),
+                MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.targetTemperatures)),
+                MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.PenaltyWornByCorpse)),
+                MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.AutoWorkPriorities)),
+            };
+
+            MP.RegisterSyncMethod(typeof(ExtendedOutfit), nameof(ExtendedOutfit.AddStatPriority));
+            MP.RegisterSyncMethod(typeof(ExtendedOutfit), nameof(ExtendedOutfit.RemoveStatPriority));
+
+            MP.RegisterSyncMethod(typeof(ExtendedOutfitProxy), nameof(SetStat));
+
+            MP.RegisterSyncWorker<ExtendedOutfit>(ExtendedOutfitSyncer);
         }
 
-        static ISyncField SyncField (Type type, string member)
+        static void Update(object arg1, object arg2)
         {
-            return MPApi.SyncField (type, member).SetBufferChanges ();
-        }
+            float targetWeight = (float) arg2;
 
-        // workaround until MPApi allows null Watches
-        static readonly ExtendedOutfitProxy Instance = new ExtendedOutfitProxy ();
-        [Syncer (shouldConstruct = false)]
-        static void ProxySyncer (SyncWorker sync, ref ExtendedOutfitProxy proxy)
-        {
-            if (!sync.isWriting) {
-                proxy = Instance;
+            var outfit = Current.Game.outfitDatabase.AllOutfits.Find(o => o.uniqueId == targetOutfitId) as ExtendedOutfit;
+
+            if (outfit == null) throw new Exception("Not an ExtendedOutfit");
+
+            var statPriority = outfit.StatPriorities.FirstOrDefault(sp => sp.Stat == targetStat);
+
+            if (statPriority == null) {
+                outfit.AddStatPriority(targetStat, targetWeight);
+            } else {
+                statPriority.Weight = targetWeight;
             }
         }
 
-        [Syncer (shouldConstruct = false)]
+        static void Watch(this ISyncField[] fields, object target = null)
+        {
+            foreach(var field in fields) {
+                field.Watch(target);
+            }
+        }
+
+        public static void Watch(ref ExtendedOutfit outfit)
+        {
+            ProxyFields.Watch();
+            ExtendedOutfitFields.Watch(outfit);
+        }
+
+        // For sliders, we must buffer weight but stat must be accurate
+        public static void SetStatPriority(int selectedOutfitId, StatDef stat, float weight)
+        {
+            if (targetOutfitId != selectedOutfitId || !targetStat.Equals(stat)) {
+                // Forces any changes
+                SetStat(selectedOutfitId, stat, weight);
+            } else {
+                // Buffers the rest
+                targetWeight = weight;
+            }
+        }
+
+        // That's why it gets its own SyncMethod, SyncFields suffer from buffers
+        static void SetStat(int uid, StatDef stat, float weight)
+        {
+            targetOutfitId = uid;
+            targetStat = stat;
+            Update(null, weight);
+        }
+
         static void ExtendedOutfitSyncer (SyncWorker sync, ref ExtendedOutfit outfit)
         {
             if (sync.isWriting) {
@@ -56,57 +104,6 @@ namespace Outfitted
                     outfit = extendedOutfit;
                 }
             }
-        }
-
-        [Syncer (shouldConstruct = false)]
-        static void StatPrioritySyncer (SyncWorker sync, ref StatPriority sp)
-        {
-            int uid = selectedOutfitId;
-            StatDef stat;
-
-            if (sync.isWriting) {
-                stat = sp.Stat;
-
-                sync.Bind (ref uid);
-                sync.Bind (ref stat);
-                sync.Bind (ref sp.Weight);
-            } else {
-                stat = null;
-                float weight = 0;
-
-                sync.Bind (ref uid);
-                sync.Bind (ref stat);
-                sync.Bind (ref weight);
-
-                var targetOutfit = Current.Game.outfitDatabase.AllOutfits.Find (o => o.uniqueId == uid);
-                if (targetOutfit is ExtendedOutfit extendedOutfit) {
-                    sp = extendedOutfit.StatPriorities.FirstOrDefault (o => o.Stat == stat);
-
-                    if (sp != null) {
-                        sp.Weight = weight;
-                    } else {
-                        extendedOutfit.AddStatPriority (stat, weight);
-                    }
-                } else {
-                    Log.Warning ("Outfitted :: DESYNC INCOMING");
-                }
-            }
-        }
-
-        public static void Watch (ref ExtendedOutfit outfit)
-        {
-            selectedOutfitId = outfit.uniqueId;
-
-            targetTemperaturesOverride.Watch (outfit);
-            targetTemperatures.Watch (outfit);
-            PenaltyWornByCorpse.Watch (outfit);
-            AutoWorkPriorities.Watch( outfit );
-            selectedStatPrioritySF.Watch (Instance);
-        }
-
-        public static void SetStatPriority (StatDef stat, float weight)
-        {
-            selectedStatPriority = new StatPriority (stat, weight);
         }
     }
 }

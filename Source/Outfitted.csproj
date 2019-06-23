@@ -40,9 +40,8 @@
       <HintPath>..\Dlls\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="0UnofficialMultiplayerAPI">
-      <HintPath>..\Dlls\0UnofficialMultiplayerAPI.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="0MultiplayerAPI">
+      <HintPath>..\Dlls\0MultiplayerAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
