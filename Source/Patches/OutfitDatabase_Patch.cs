@@ -39,7 +39,8 @@ namespace Outfitted.Database
     [HarmonyPatch(typeof(OutfitDatabase), nameof(OutfitDatabase.ExposeData))]
     static class OutfitDatabase_ExposeData_Patch
     {
-        static void Postfix(OutfitDatabase __instance, List<Outfit> ___outfits) {
+        static void Postfix(OutfitDatabase __instance, List<Outfit> ___outfits)
+        {
             if (Scribe.mode != LoadSaveMode.LoadingVars) {
                 return;
             }
@@ -57,7 +58,8 @@ namespace Outfitted.Database
             OutfitDatabase_GenerateStartingOutfits_Patch.GenerateStartingOutfits(__instance, false);
         }
 
-        static Outfit ReplaceKnownVanillaOutfits(Outfit outfit) {
+        static Outfit ReplaceKnownVanillaOutfits(Outfit outfit)
+        {
             var newOutfit = new ExtendedOutfit(outfit);
             switch (newOutfit.label)
             {
@@ -109,7 +111,8 @@ namespace Outfitted.Database
     [HarmonyPatch(typeof(OutfitDatabase), "GenerateStartingOutfits")]
     public static class OutfitDatabase_GenerateStartingOutfits_Patch
     {
-        static bool Prefix(OutfitDatabase __instance) {
+        static bool Prefix(OutfitDatabase __instance)
+        {
             try {
                 GenerateStartingOutfits(__instance);
             } catch (Exception e) {
@@ -119,22 +122,23 @@ namespace Outfitted.Database
             return false;
         }
 
-        internal static void GenerateStartingOutfits(OutfitDatabase db, bool vanilla = true) {
+        internal static void GenerateStartingOutfits(OutfitDatabase db, bool vanilla = true)
+        {
             if (vanilla) {
-                ConfigureWorkerOutfit(MakeOutfit(db, "Anything"), new Dictionary<StatDef, float> {
+                ConfigureOutfit(MakeOutfit(db, "Anything", true), new Dictionary<StatDef, float> {
                     {StatDefOf.MoveSpeed, Priority.Desired},
                     {StatDefOf.WorkSpeedGlobal, Priority.Wanted},
                     {StatDefOf.ArmorRating_Blunt, Priority.Desired},
                     {StatDefOf.ArmorRating_Sharp, Priority.Desired},
                 });
 
-                ConfigureWorkerOutfit(MakeOutfit(db, "Worker"), new Dictionary<StatDef, float> {
+                ConfigureOutfitWorker(MakeOutfit(db, "Worker", true), new Dictionary<StatDef, float> {
                     {StatDefOf.MoveSpeed, Priority.Neutral},
                     {StatDefOf.WorkSpeedGlobal, Priority.Desired},
                 });
             }
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Doctor"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Doctor"), new Dictionary<StatDef, float> {
                 {StatDefOf.MedicalSurgerySuccessChance, Priority.Wanted},
                 {StatDef.Named("MedicalOperationSpeed"), Priority.Wanted},
                 {StatDefOf.MedicalTendQuality, Priority.Wanted},
@@ -142,13 +146,13 @@ namespace Outfitted.Database
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Warden"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Warden"), new Dictionary<StatDef, float> {
                 {StatDefOf.NegotiationAbility, Priority.Wanted},
                 {StatDefOf.SocialImpact, Priority.Desired},
                 {StatDefOf.TradePriceImprovement, Priority.Wanted},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Handler"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Handler"), new Dictionary<StatDef, float> {
                 {StatDefOf.TrainAnimalChance, Priority.Wanted},
                 {StatDefOf.TameAnimalChance, Priority.Wanted},
                 {StatDefOf.ArmorRating_Sharp, Priority.Neutral},
@@ -164,7 +168,7 @@ namespace Outfitted.Database
                 {StatDefOf.AnimalGatherSpeed, Priority.Wanted},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Cook"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Cook"), new Dictionary<StatDef, float> {
                 {StatDef.Named("DrugCookingSpeed"), Priority.Wanted},
                 {StatDef.Named("ButcheryFleshSpeed"), Priority.Wanted},
                 {StatDef.Named("ButcheryFleshEfficiency"), Priority.Wanted},
@@ -174,7 +178,7 @@ namespace Outfitted.Database
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureSoldierOutfit(MakeOutfit(db, "Hunter"), new Dictionary<StatDef, float> {
+            ConfigureOutfitSoldier(MakeOutfit(db, "Hunter"), new Dictionary<StatDef, float> {
                 {StatDefOf.ShootingAccuracyPawn, Priority.Wanted},
                 {StatDefOf.MoveSpeed, Priority.Desired},
                 {StatDefOf.AccuracyShort, Priority.Desired},
@@ -189,7 +193,7 @@ namespace Outfitted.Database
                 {StatDefOf.PainShockThreshold, Priority.Wanted},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Builder"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Builder"), new Dictionary<StatDef, float> {
                 {StatDefOf.FixBrokenDownBuildingSuccessChance, Priority.Wanted},
                 {StatDefOf.ConstructionSpeed, Priority.Wanted},
                 {StatDefOf.ConstructSuccessChance, Priority.Wanted},
@@ -198,58 +202,58 @@ namespace Outfitted.Database
                 {StatDefOf.WorkSpeedGlobal, Priority.Neutral},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Grower"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Grower"), new Dictionary<StatDef, float> {
                 {StatDefOf.PlantHarvestYield, Priority.Wanted},
                 {StatDefOf.PlantWorkSpeed, Priority.Wanted},
                 {StatDefOf.MoveSpeed, Priority.Neutral},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Miner"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Miner"), new Dictionary<StatDef, float> {
                 {StatDefOf.MiningYield, Priority.Wanted},
                 {StatDefOf.MiningSpeed, Priority.Wanted},
                 {StatDefOf.MoveSpeed, Priority.Neutral},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Smith"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Smith"), new Dictionary<StatDef, float> {
                 {StatDef.Named("SmithingSpeed"), Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Tailor"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Tailor"), new Dictionary<StatDef, float> {
                 {StatDef.Named("TailoringSpeed"), Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Artist"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Artist"), new Dictionary<StatDef, float> {
                 {StatDef.Named("SculptingSpeed"), Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Crafter"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Crafter"), new Dictionary<StatDef, float> {
                 {StatDef.Named("SmeltingSpeed"), Priority.Wanted},
                 {StatDef.Named("ButcheryMechanoidSpeed"), Priority.Wanted},
                 {StatDef.Named("ButcheryMechanoidEfficiency"), Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Wanted},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Hauler"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Hauler"), new Dictionary<StatDef, float> {
                 {StatDefOf.MoveSpeed, Priority.Wanted},
                 {StatDefOf.CarryingCapacity, Priority.Wanted},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Cleaner"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Cleaner"), new Dictionary<StatDef, float> {
                 {StatDefOf.MoveSpeed, Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Wanted},
             });
 
-            ConfigureWorkerOutfit(MakeOutfit(db, "Researcher"), new Dictionary<StatDef, float> {
+            ConfigureOutfitWorker(MakeOutfit(db, "Researcher"), new Dictionary<StatDef, float> {
                 {StatDefOf.ResearchSpeed, Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
-            ConfigureSoldierOutfit(MakeOutfit(db, "Brawler"), new Dictionary<StatDef, float> {
+            ConfigureOutfitSoldier(MakeOutfit(db, "Brawler"), new Dictionary<StatDef, float> {
                 {StatDefOf.MoveSpeed, Priority.Wanted},
                 {StatDefOf.AimingDelayFactor, Priority.Unwanted},
                 {StatDefOf.MeleeDPS, Priority.Wanted},
@@ -264,7 +268,7 @@ namespace Outfitted.Database
             });
 
             if (vanilla) {
-                ConfigureSoldierOutfit(MakeOutfit(db, "Soldier"), new Dictionary<StatDef, float> {
+                ConfigureOutfitSoldier(MakeOutfit(db, "Soldier"), new Dictionary<StatDef, float> {
                     {StatDefOf.ShootingAccuracyPawn, Priority.Wanted},
                     {StatDefOf.AccuracyShort, Priority.Desired},
                     {StatDefOf.AccuracyMedium, Priority.Desired},
@@ -277,65 +281,61 @@ namespace Outfitted.Database
                     {StatDefOf.RangedWeapon_Cooldown, Priority.Unwanted},
                     {StatDefOf.PainShockThreshold, Priority.Wanted},
                 });
-                ConfigureNudistOutfit(MakeOutfit(db, "Nudist"), new Dictionary<StatDef, float> {
+                ConfigureOutfitNudist(MakeOutfit(db, "Nudist", true), new Dictionary<StatDef, float> {
                     {StatDefOf.MoveSpeed, Priority.Desired},
                     {StatDefOf.WorkSpeedGlobal, Priority.Wanted},
                 });
             }
         }
 
-        static Outfit MakeOutfit(OutfitDatabase database, string name) {
-            var outfit = database.MakeNewOutfit();
+        static ExtendedOutfit MakeOutfit(OutfitDatabase database, string name, bool autoWorkPriorities = false)
+        {
+            var outfit = database.MakeNewOutfit() as ExtendedOutfit;
             outfit.label = ("Outfit" + name).Translate();
+            outfit.AutoWorkPriorities = autoWorkPriorities;
             return outfit;
         }
 
-        static void ConfigureWorkerOutfit(Outfit outfit, Dictionary<StatDef, float> priorities) {
+        static void ConfigureOutfit(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities)
+        {
+            outfit.AddRange(priorities.Select(i => new StatPriority(i.Key, i.Value, i.Value)));
+        }
+
+        static void ConfigureOutfitFiltered(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities, Func<ThingDef, bool> filter)
+        {
             outfit.filter.SetDisallowAll(null, null);
             outfit.filter.SetAllow(SpecialThingFilterDefOf.AllowDeadmansApparel, false);
-            foreach (ThingDef current in DefDatabase<ThingDef>.AllDefs)
-            {
-                if (current.apparel != null && current.apparel.defaultOutfitTags != null && current.apparel.defaultOutfitTags.Contains("Worker"))
-                {
-                    outfit.filter.SetAllow(current, true);
-                }
+
+            foreach(ThingDef current in DefDatabase<ThingDef>.AllDefs.Where(filter)) {
+                outfit.filter.SetAllow(current, true);
             }
+
             ConfigureOutfit(outfit, priorities);
         }
 
-        static void ConfigureSoldierOutfit(Outfit outfit, Dictionary<StatDef, float> priorities) {
-            outfit.filter.SetDisallowAll(null, null);
-            outfit.filter.SetAllow(SpecialThingFilterDefOf.AllowDeadmansApparel, false);
-            foreach (ThingDef current in DefDatabase<ThingDef>.AllDefs)
-            {
-                if (current.apparel != null && current.apparel.defaultOutfitTags != null && current.apparel.defaultOutfitTags.Contains("Soldier"))
-                {
-                    outfit.filter.SetAllow(current, true);
-                }
-            }
-            ConfigureOutfit(outfit, priorities);
+        static void ConfigureOutfitTagged(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities, string tag)
+        {
+            ConfigureOutfitFiltered(outfit, priorities, d => d.apparel?.defaultOutfitTags?.Contains(tag) ?? false);
         }
 
-        static void ConfigureNudistOutfit(Outfit outfit, Dictionary<StatDef, float> priorities) {
-            outfit.filter.SetDisallowAll(null, null);
-            outfit.filter.SetAllow(SpecialThingFilterDefOf.AllowDeadmansApparel, false);
-            foreach (ThingDef current in DefDatabase<ThingDef>.AllDefs)
-            {
-                if (current.apparel != null && !current.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.Legs) && !current.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.Torso))
-                {
-                    outfit.filter.SetAllow(current, true);
-                }
-            }
-            ConfigureOutfit(outfit, priorities);
+        static void ConfigureOutfitWorker(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities)
+        {
+            ConfigureOutfitTagged(outfit, priorities, "Worker");
         }
 
-        static void ConfigureOutfit(Outfit outfit, Dictionary<StatDef, float> priorities) {
-            var extendedOutfit = outfit as ExtendedOutfit;
-            if (extendedOutfit == null) {
-                Log.ErrorOnce("Outfitted :: Can't configure, not an ExtendedOutfit", 128848);
-                return;
-            }
-            extendedOutfit.AddRange(priorities.Select(i => new StatPriority(i.Key, i.Value, i.Value)));
+        static void ConfigureOutfitSoldier(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities)
+        {
+            ConfigureOutfitTagged(outfit, priorities, "Soldier");
+        }
+
+        static void ConfigureOutfitNudist(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities)
+        {
+            var forbid = new[] {
+                BodyPartGroupDefOf.Legs,
+                BodyPartGroupDefOf.Torso
+            };
+
+            ConfigureOutfitFiltered(outfit, priorities, d => d.apparel?.bodyPartGroups.All(g => !forbid.Contains(g)) ?? false);
         }
     }
 }
