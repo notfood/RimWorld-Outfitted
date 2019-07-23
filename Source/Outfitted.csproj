@@ -41,7 +41,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="0MultiplayerAPI">
-      <HintPath>..\Dlls\0MultiplayerAPI.dll</HintPath>
+      <HintPath>packages\RimWorld.MultiplayerAPI.0.1.0\lib\net35\0MultiplayerAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
