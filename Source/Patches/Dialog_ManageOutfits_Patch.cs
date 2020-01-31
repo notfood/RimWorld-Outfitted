@@ -51,7 +51,14 @@ namespace Outfitted
             }
             DrawDeadmanToogle (selectedOutfit, ref cur, canvas);
             DrawAutoWorkPrioritiesToggle( selectedOutfit, ref cur, canvas );
-            DrawTemperatureStats(selectedOutfit, ref cur, canvas);
+            DrawAutoTempToggle(selectedOutfit, ref cur, canvas);
+            if (!selectedOutfit.AutoTemp)
+            {
+                DrawTemperatureStats(selectedOutfit, ref cur, canvas);
+            } else
+            {
+                DrawAutoTempOffsetInput(selectedOutfit, ref cur, canvas);
+            }
             cur.y += marginVertical;
             DrawApparelStats(selectedOutfit, cur, canvas);
 
@@ -86,6 +93,27 @@ namespace Outfitted
             Widgets.CheckboxLabeled( rect, ResourceBank.Strings.AutoWorkPriorities,
                                      ref outfit.AutoWorkPriorities );
             TooltipHandler.TipRegion( rect, ResourceBank.Strings.AutoWorkPrioritiesTooltip );
+            pos.y += rect.height;
+        }
+
+        static void DrawAutoTempToggle(ExtendedOutfit outfit, ref Vector2 pos, Rect canvas)
+        {
+            Rect rect = new Rect(pos.x, pos.y, canvas.width, 30f);
+            var autoTemp = outfit.AutoTemp;
+            Widgets.CheckboxLabeled(rect, ResourceBank.Strings.AutoTemp,
+                                     ref autoTemp);
+            outfit.AutoTemp = autoTemp;
+            TooltipHandler.TipRegion(rect, ResourceBank.Strings.AutoTempTooltip);
+            pos.y += rect.height;
+        }
+
+        static void DrawAutoTempOffsetInput(ExtendedOutfit outfit, ref Vector2 pos, Rect canvas)
+        {
+            Rect rect = new Rect(pos.x, pos.y, canvas.width, 30f);
+            //TODO: input label
+            var autoTempOffsetString = outfit.autoTempOffset.ToString();
+            Widgets.IntEntry(rect, ref outfit.autoTempOffset, ref autoTempOffsetString);
+            TooltipHandler.TipRegion(rect, ResourceBank.Strings.AutoTempOffsetTooltip);
             pos.y += rect.height;
         }
 
