@@ -10,6 +10,12 @@
   <PreferedTemperature>Temperature range</PreferedTemperature>
   <TemperatureRangeReset>Reset temperature range to seasonal temperature</TemperatureRangeReset>
   
+  <AutoTemp>Automatic temperature range</AutoTemp>
+  <AutoTempTooltip>If enabled, automatically set the temperature range to the current seasonal temperature plus an offset</AutoTempTooltip>
+
+  <AutoTempOffset>Auto temp offset</AutoTempOffset>
+  <AutoTempOffsetTooltip>The amount to use as a buffer around the current seasonal temperature</AutoTempOffsetTooltip>
+  
   <PreferedStats>Stat priorities</PreferedStats>
   
   <StatPriorityAdd>Add new priority</StatPriorityAdd>

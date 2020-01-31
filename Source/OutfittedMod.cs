@@ -141,6 +141,11 @@ namespace Outfitted
 
                 var currentRange = pawn.ComfortableTemperatureRange();
                 var candidateRange = currentRange;
+                if(outfit.AutoTemp)
+                {
+                    var seasonalTemp = pawn.Map.mapTemperature.SeasonalTemp;
+                    outfit.targetTemperatures = new FloatRange(seasonalTemp - outfit.autoTempOffset, seasonalTemp + outfit.autoTempOffset);
+                }
                 var targetRange = outfit.targetTemperatures;
                 var apparelOffset = GetInsulationStats(apparel);
 

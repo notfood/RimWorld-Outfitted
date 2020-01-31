@@ -288,11 +288,12 @@ namespace Outfitted.Database
             }
         }
 
-        static ExtendedOutfit MakeOutfit(OutfitDatabase database, string name, bool autoWorkPriorities = false)
+        static ExtendedOutfit MakeOutfit(OutfitDatabase database, string name, bool autoWorkPriorities = false, bool autoTemp = true)
         {
             var outfit = database.MakeNewOutfit() as ExtendedOutfit;
             outfit.label = ("Outfit" + name).Translate();
             outfit.AutoWorkPriorities = autoWorkPriorities;
+            outfit.AutoTemp = autoTemp;
             return outfit;
         }
 

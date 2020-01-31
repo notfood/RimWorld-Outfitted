@@ -44,6 +44,10 @@ namespace Outfitted
 
             public static readonly string AutoWorkPriorities = TL( "AutoWorkPriorities" );
             public static readonly string AutoWorkPrioritiesTooltip = TL( "AutoWorkPrioritiesTooltip" );
+            public static readonly string AutoTemp = TL("AutoTemp");
+            public static readonly string AutoTempTooltip = TL( "AutoTempTooltip" );
+            public static readonly string AutoTempOffset = TL( "AutoTempOffset" );
+            public static readonly string AutoTempOffsetTooltip = TL( "AutoTempOffsetTooltip" );
 
 
             public static string StatPriorityDelete(string labelCap) => TL("StatPriorityDelete", labelCap);

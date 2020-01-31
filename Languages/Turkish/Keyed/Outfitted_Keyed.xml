@@ -10,6 +10,12 @@
   <PreferedTemperature>Tercih edilen sıcaklık</PreferedTemperature>
   <TemperatureRangeReset>Sıcaklık aralığını mevsime uygun olarak sıfırla</TemperatureRangeReset>
   
+  <AutoTemp>Otomatik sıcaklık aralığı</AutoTemp>
+  <AutoTempTooltip>Etkinleştirilirse, sıcaklık aralığını mevcut mevsimsel sıcaklığa ve bir ofsete otomatik olarak ayarlayın</AutoTempTooltip>
+
+  <AutoTempOffset>Otomatik sıcaklık ofseti</AutoTempOffset>
+  <AutoTempOffsetTooltip>Mevcut mevsimsel sıcaklık etrafında tampon olarak kullanılacak miktar</AutoTempOffsetTooltip>
+  
   <PreferedStats>İstatistik önceliği</PreferedStats>
   
   <StatPriorityAdd>Yeni öncelik ekle</StatPriorityAdd>

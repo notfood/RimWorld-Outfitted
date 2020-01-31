@@ -14,6 +14,24 @@ namespace Outfitted
         public bool PenaltyWornByCorpse = true;
 
         public bool AutoWorkPriorities;
+        private bool _autoTemp;
+        public bool AutoTemp
+        {
+            get
+            {
+                return _autoTemp;
+            }
+            set
+            {
+                _autoTemp = value;
+                if(_autoTemp)
+                {
+                    targetTemperaturesOverride = true;
+                }
+            }
+        }
+
+        public int autoTempOffset = 20;
 
         static IEnumerable<StatCategoryDef> blacklistedCategories = new List<StatCategoryDef>()
         {
@@ -85,6 +103,8 @@ namespace Outfitted
             Scribe_Values.Look(ref PenaltyWornByCorpse, "PenaltyWornByCorpse", true);
             Scribe_Collections.Look(ref statPriorities, "statPriorities", LookMode.Deep);
             Scribe_Values.Look(ref AutoWorkPriorities, "AutoWorkPriorities", false );
+            Scribe_Values.Look(ref _autoTemp, "AutoTemp" );
+            Scribe_Values.Look(ref autoTempOffset, "autoTempOffset" );
         }
     }
 }
