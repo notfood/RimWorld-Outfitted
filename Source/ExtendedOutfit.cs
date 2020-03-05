@@ -106,5 +106,18 @@ namespace Outfitted
             Scribe_Values.Look(ref _autoTemp, "AutoTemp" );
             Scribe_Values.Look(ref autoTempOffset, "autoTempOffset" );
         }
+
+        public void CopyFrom(ExtendedOutfit outfit)
+        {
+            filter.CopyAllowancesFrom(outfit.filter);
+            targetTemperaturesOverride = outfit.targetTemperaturesOverride;
+            targetTemperatures = outfit.targetTemperatures;
+            PenaltyWornByCorpse = outfit.PenaltyWornByCorpse;
+            statPriorities.Clear();
+            statPriorities.AddRange(outfit.statPriorities);
+            AutoWorkPriorities = outfit.AutoWorkPriorities;
+            _autoTemp = outfit._autoTemp;
+            autoTempOffset = outfit.autoTempOffset;
+        }
     }
 }

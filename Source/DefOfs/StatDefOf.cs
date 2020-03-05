@@ -27,10 +27,7 @@ namespace Outfitted
         public static StatDef MedicalTendQuality;
         public static StatDef MedicalOperationSpeed;
         public static StatDef MedicalSurgerySuccessChance;
-        public static StatDef UnskilledLaborSpeed;
-        public static StatDef SculptingSpeed;
-        public static StatDef TailoringSpeed;
-        public static StatDef SmithingSpeed;
+        public static StatDef GeneralLaborSpeed;
         public static StatDef DrugSynthesisSpeed;
         public static StatDef CookSpeed;
         public static StatDef FoodPoisonChance;
@@ -39,7 +36,6 @@ namespace Outfitted
         public static StatDef ButcheryMechanoidSpeed;
         public static StatDef ButcheryFleshEfficiency;
         public static StatDef ButcheryMechanoidEfficiency;
-        public static StatDef SmeltingSpeed;
         public static StatDef MeleeWeapon_DamageMultiplier;
         public static StatDef AccuracyTouch;
         public static StatDef AccuracyShort;

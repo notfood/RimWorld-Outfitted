@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Harmony;
+using HarmonyLib;
 using Multiplayer.API;
 
 using RimWorld;
@@ -30,6 +30,9 @@ namespace Outfitted
         static void Postfix(Rect inRect, Outfit ___selOutfitInt)
         {
             var selectedOutfit = ___selOutfitInt as ExtendedOutfit;
+
+            DrawCloneButton(selectedOutfit);
+
             if (selectedOutfit == null) {
                 return;
             }
@@ -76,6 +79,26 @@ namespace Outfitted
 
             GUI.color = Color.white;
             Text.Anchor = TextAnchor.UpperLeft;
+        }
+
+        static void DrawCloneButton(ExtendedOutfit selectedOutfit)
+        {
+            Rect rect = new Rect(480, 0f, 150f, 35f);
+            if (Widgets.ButtonText(rect, "CommandCopyZoneSettingsLabel".Translate(), true, true, true))
+            {
+                if (selectedOutfit == null) {
+                    Messages.Message("NoOutfitSelected".Translate(), MessageTypeDefOf.RejectInput, false);
+                    return;
+                }
+
+                List<FloatMenuOption> list2 = new List<FloatMenuOption>();
+                foreach (Outfit outfit in Current.Game.outfitDatabase.AllOutfits) {
+                    if (outfit == selectedOutfit) continue;
+                    list2.Add(new FloatMenuOption(outfit.label, () => selectedOutfit.CopyFrom((ExtendedOutfit)outfit), MenuOptionPriority.Default, null, null, 0f, null, null));
+                }
+
+                Find.WindowStack.Add(new FloatMenu(list2));
+            }
         }
 
         static void DrawDeadmanToogle(ExtendedOutfit selectedOutfit, ref Vector2 cur, Rect canvas)

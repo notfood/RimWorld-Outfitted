@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -14,7 +14,7 @@ namespace Outfitted
 
         static OutfittedMod()
         {
-            HarmonyInstance.Create("rimworld.outfitted").PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
+            new Harmony("rimworld.outfitted").PatchAll();
         }
 
         private static readonly SimpleCurve HitPointsPercentScoreFactorCurve = new SimpleCurve

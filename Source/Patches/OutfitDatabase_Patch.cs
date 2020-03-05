@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
 using Verse;
 
@@ -140,7 +140,7 @@ namespace Outfitted.Database
 
             ConfigureOutfitWorker(MakeOutfit(db, "Doctor"), new Dictionary<StatDef, float> {
                 {StatDefOf.MedicalSurgerySuccessChance, Priority.Wanted},
-                {StatDef.Named("MedicalOperationSpeed"), Priority.Wanted},
+                {StatDefOf.MedicalOperationSpeed, Priority.Wanted},
                 {StatDefOf.MedicalTendQuality, Priority.Wanted},
                 {StatDefOf.MedicalTendSpeed, Priority.Desired},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
@@ -169,10 +169,10 @@ namespace Outfitted.Database
             });
 
             ConfigureOutfitWorker(MakeOutfit(db, "Cook"), new Dictionary<StatDef, float> {
-                {StatDef.Named("DrugCookingSpeed"), Priority.Wanted},
-                {StatDef.Named("ButcheryFleshSpeed"), Priority.Wanted},
-                {StatDef.Named("ButcheryFleshEfficiency"), Priority.Wanted},
-                {StatDef.Named("CookSpeed"), Priority.Wanted},
+                {StatDefOf.DrugCookingSpeed, Priority.Wanted},
+                {StatDefOf.ButcheryFleshSpeed, Priority.Wanted},
+                {StatDefOf.ButcheryFleshEfficiency, Priority.Wanted},
+                {StatDefOf.CookSpeed, Priority.Wanted},
                 {StatDefOf.FoodPoisonChance, Priority.Unwanted},
                 {StatDefOf.MoveSpeed, Priority.Desired},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
@@ -217,24 +217,24 @@ namespace Outfitted.Database
             });
 
             ConfigureOutfitWorker(MakeOutfit(db, "Smith"), new Dictionary<StatDef, float> {
-                {StatDef.Named("SmithingSpeed"), Priority.Wanted},
+                {StatDefOf.GeneralLaborSpeed, Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
             ConfigureOutfitWorker(MakeOutfit(db, "Tailor"), new Dictionary<StatDef, float> {
-                {StatDef.Named("TailoringSpeed"), Priority.Wanted},
+                {StatDefOf.GeneralLaborSpeed, Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
             ConfigureOutfitWorker(MakeOutfit(db, "Artist"), new Dictionary<StatDef, float> {
-                {StatDef.Named("SculptingSpeed"), Priority.Wanted},
+                {StatDefOf.GeneralLaborSpeed, Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Desired},
             });
 
             ConfigureOutfitWorker(MakeOutfit(db, "Crafter"), new Dictionary<StatDef, float> {
-                {StatDef.Named("SmeltingSpeed"), Priority.Wanted},
-                {StatDef.Named("ButcheryMechanoidSpeed"), Priority.Wanted},
-                {StatDef.Named("ButcheryMechanoidEfficiency"), Priority.Wanted},
+                {StatDefOf.GeneralLaborSpeed, Priority.Wanted},
+                {StatDefOf.ButcheryMechanoidSpeed, Priority.Wanted},
+                {StatDefOf.ButcheryMechanoidEfficiency, Priority.Wanted},
                 {StatDefOf.WorkSpeedGlobal, Priority.Wanted},
             });
 
@@ -316,6 +316,7 @@ namespace Outfitted.Database
 
         static void ConfigureOutfitTagged(ExtendedOutfit outfit, Dictionary<StatDef, float> priorities, string tag)
         {
+
             ConfigureOutfitFiltered(outfit, priorities, d => d.apparel?.defaultOutfitTags?.Contains(tag) ?? false);
         }
 

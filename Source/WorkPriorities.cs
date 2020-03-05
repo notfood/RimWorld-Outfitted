@@ -118,13 +118,15 @@ namespace Outfitted
             if ( worktype == WorkTypeDefOf.Art )
             {
                 // Work :: SculptingSpeed :: Sculpting speed
-                stats.Add( new StatPriority( StatDefOf.SculptingSpeed, Priority.Wanted ) );
+                stats.Add( new StatPriority(StatDefOf.WorkSpeedGlobal, Priority.Desired ));
+                stats.Add( new StatPriority(StatDefOf.GeneralLaborSpeed, Priority.Wanted ));
             }
 
             if ( worktype == WorkTypeDefOf.BasicWorker )
             {
                 // Work :: UnskilledLaborSpeed :: Unskilled labor speed
-                stats.Add( new StatPriority( StatDefOf.UnskilledLaborSpeed, Priority.Wanted ) );
+                stats.Add( new StatPriority(StatDefOf.WorkSpeedGlobal, Priority.Desired ));
+                stats.Add( new StatPriority( StatDefOf.GeneralLaborSpeed, Priority.Wanted ) );
             }
 
             if ( worktype == WorkTypeDefOf.Cleaning )
@@ -295,17 +297,15 @@ namespace Outfitted
 
             if ( worktype == WorkTypeDefOf.Smithing )
             {
-                // Work :: SmithingSpeed :: Smithing speed
-                // Work :: SmeltingSpeed :: Smelting speed
-                stats.Add( new StatPriority( StatDefOf.SmeltingSpeed, Priority.Desired ) );
-                stats.Add( new StatPriority( StatDefOf.SmithingSpeed, Priority.Wanted ) );
+                stats.Add( new StatPriority( StatDefOf.WorkSpeedGlobal, Priority.Desired ) );
+                stats.Add( new StatPriority( StatDefOf.GeneralLaborSpeed, Priority.Wanted ) );
 
             }
 
             if ( worktype == WorkTypeDefOf.Tailoring )
             {
-                // Work :: TailoringSpeed :: Tailoring speed
-                stats.Add( new StatPriority( StatDefOf.TailoringSpeed, Priority.Wanted ) );
+                stats.Add(new StatPriority(StatDefOf.WorkSpeedGlobal, Priority.Desired));
+                stats.Add( new StatPriority( StatDefOf.GeneralLaborSpeed, Priority.Wanted ) );
 
             }
 
@@ -321,6 +321,8 @@ namespace Outfitted
                 stats.Add( new StatPriority( StatDefOf.SocialImpact, Priority.Wanted ) );
 
             }
+
+            stats.RemoveDuplicates();
 
             return stats;
         }
