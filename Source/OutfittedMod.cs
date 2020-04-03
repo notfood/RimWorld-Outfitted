@@ -136,8 +136,7 @@ namespace Outfitted
                 // system to solve would be fairly massive, optimizing for dozens of pawns and hundreds of pieces 
                 // of gear simultaneously. Second, many of the stat functions aren't actually linear, and would
                 // have to be made to be linear.
-                if ( pawn.apparel.WornApparel.Contains( apparel ) )
-                    return 1f;
+                bool currentlyWorn = pawn.apparel.WornApparel.Contains(apparel);
 
                 var currentRange = pawn.ComfortableTemperatureRange();
                 var candidateRange = currentRange;
@@ -152,15 +151,18 @@ namespace Outfitted
                 // effect of this piece of apparel
                 candidateRange.min += apparelOffset.min;
                 candidateRange.max += apparelOffset.max;
-                foreach (var otherApparel in pawn.apparel.WornApparel)
+                if(!currentlyWorn)
                 {
-                    // effect of taking off any other apparel that is incompatible
-                    if (!ApparelUtility.CanWearTogether(apparel.def, otherApparel.def, pawn.RaceProps.body))
+                    foreach (var otherApparel in pawn.apparel.WornApparel)
                     {
-                        var otherInsulationRange = GetInsulationStats(otherApparel);
+                        // effect of taking off any other apparel that is incompatible
+                        if (!ApparelUtility.CanWearTogether(apparel.def, otherApparel.def, pawn.RaceProps.body))
+                        {
+                            var otherInsulationRange = GetInsulationStats(otherApparel);
 
-                        candidateRange.min -= otherInsulationRange.min;
-                        candidateRange.max -= otherInsulationRange.max;
+                            candidateRange.min -= otherInsulationRange.min;
+                            candidateRange.max -= otherInsulationRange.max;
+                        }
                     }
                 }
 
