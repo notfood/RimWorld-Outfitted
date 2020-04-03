@@ -136,7 +136,7 @@ namespace Outfitted
                 // system to solve would be fairly massive, optimizing for dozens of pawns and hundreds of pieces 
                 // of gear simultaneously. Second, many of the stat functions aren't actually linear, and would
                 // have to be made to be linear.
-                var currentlyWorn = pawn.apparel.WornApparel.Contains(apparel);
+                bool currentlyWorn = pawn.apparel.WornApparel.Contains(apparel);
 
                 var currentRange = pawn.ComfortableTemperatureRange();
                 var candidateRange = currentRange;
