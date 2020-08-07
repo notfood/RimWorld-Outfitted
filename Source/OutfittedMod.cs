@@ -65,7 +65,7 @@ namespace Outfitted
 
             score += ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
 
-            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel))
+            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.DeadMansApparel, true))
             {
                 score -= 0.5f;
                 if (score > 0f)
@@ -76,7 +76,7 @@ namespace Outfitted
 
             if (apparel.Stuff == ThingDefOf.Human.race.leatherDef)
             {
-                if (ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelSad))
+                if (ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.HumanLeatherApparelSad, true))
                 {
                     score -= 0.5f;
                     if (score > 0f)
@@ -84,7 +84,7 @@ namespace Outfitted
                         score *= 0.1f;
                     }
                 }
-                if (ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelHappy))
+                if (ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.HumanLeatherApparelHappy, true))
                 {
                     score += 0.12f;
                 }
