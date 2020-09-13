@@ -5,14 +5,15 @@ using Verse;
 namespace Outfitted
 {
     [HarmonyPatch (typeof(JobGiver_OptimizeApparel), nameof(JobGiver_OptimizeApparel.ApparelScoreRaw))]
+    [HarmonyBefore("AnimalGear")]
     static class JobGiver_OptimizeApparel_ApparelScoreRaw_Patch
     {
         static bool Prefix(Pawn pawn, Apparel ap, out float __result, NeededWarmth ___neededWarmth) {
-            if (pawn == null) {
-                __result = float.NaN;
+            //if (pawn == null) {
+            //    __result = float.NaN;
 
-                return true;
-            }
+            //    return true;
+            //}
 
             __result = OutfittedMod.ApparelScoreRaw(pawn, ap, ___neededWarmth);
 
