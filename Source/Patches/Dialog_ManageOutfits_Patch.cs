@@ -208,7 +208,7 @@ namespace Outfitted
             if (Widgets.ButtonImage(addStatRect, ResourceBank.Textures.AddButton))
             {
                 var options = new List<FloatMenuOption>();
-                foreach (var def in selectedOutfit.UnassignedStats.OrderBy(i => i.label).OrderBy(i => i.category.displayOrder))
+                foreach (var def in selectedOutfit.UnassignedStats.Where(i => !i.alwaysHide).OrderBy(i => i.label).OrderBy(i => i.category.displayOrder))
                 {
                     FloatMenuOption option = new FloatMenuOption(def.LabelCap, delegate
                     {
