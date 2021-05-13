@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
@@ -42,16 +43,16 @@ namespace Outfitted
 
         public static float ApparelScoreRaw(Pawn pawn, Apparel apparel, NeededWarmth neededWarmth = NeededWarmth.Any)
         {
-            var outfit = pawn.outfits.CurrentOutfit as ExtendedOutfit;
-            if (outfit == null)
+            var outfit = pawn?.outfits?.CurrentOutfit as ExtendedOutfit;
+            if (pawn != null && outfit == null)
             {
                 Log.ErrorOnce("Outfitted :: Not an ExtendedOutfit, something went wrong.", 399441);
                 return 0f;
             }
 
-            float score = 0.1f + ApparelScoreRawPriorities(pawn, apparel, outfit);
+            float score = 0.1f + ApparelScoreRawPriorities(apparel, outfit);
 
-            if ( outfit.AutoWorkPriorities )
+            if (pawn != null && outfit?.AutoWorkPriorities == true)
             {
                 score += ApparelScoreAutoWorkPriorities( pawn, apparel );
             }
@@ -61,22 +62,15 @@ namespace Outfitted
                 float x = (float)apparel.HitPoints / apparel.MaxHitPoints;
                 score *= HitPointsPercentScoreFactorCurve.Evaluate(x);
             }
+
             score += apparel.GetSpecialApparelScoreOffset();
 
-            score += ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
+            if (pawn != null && outfit != null)
+                score += ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
 
-            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.DeadMansApparel, true))
+            if (pawn?.def?.race?.Animal == false)
             {
-                score -= 0.5f;
-                if (score > 0f)
-                {
-                    score *= 0.1f;
-                }
-            }
-
-            if (apparel.Stuff == ThingDefOf.Human.race.leatherDef)
-            {
-                if (ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.HumanLeatherApparelSad, true))
+                if (outfit?.PenaltyWornByCorpse == true && apparel.WornByCorpse && ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.DeadMansApparel, true))
                 {
                     score -= 0.5f;
                     if (score > 0f)
@@ -84,18 +78,77 @@ namespace Outfitted
                         score *= 0.1f;
                     }
                 }
-                if (ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.HumanLeatherApparelHappy, true))
+
+                if (apparel.Stuff == ThingDefOf.Human.race.leatherDef)
                 {
-                    score += 0.12f;
+                    if (ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.HumanLeatherApparelSad, true))
+                    {
+                        score -= 0.5f;
+                        if (score > 0f)
+                        {
+                            score *= 0.1f;
+                        }
+                    }
+                    if (ThoughtUtility.CanGetThought_NewTemp(pawn, ThoughtDefOf.HumanLeatherApparelHappy, true))
+                    {
+                        score += 0.12f;
+                    }
+                }
+            }
+
+            //royalty titles
+            if (pawn?.royalty?.AllTitlesInEffectForReading?.Count > 0)
+            {
+                HashSet<ThingDef> tmpAllowedApparels = new HashSet<ThingDef>();
+                HashSet<ThingDef> tmpRequiredApparels = new HashSet<ThingDef>();
+                HashSet<BodyPartGroupDef> tmpBodyPartGroupsWithRequirement = new HashSet<BodyPartGroupDef>();
+                QualityCategory qualityCategory = QualityCategory.Awful;
+                foreach (RoyalTitle item in pawn.royalty.AllTitlesInEffectForReading)
+                {
+                    if (item.def.requiredApparel != null)
+                    {
+                        for (int i = 0; i < item.def.requiredApparel.Count; i++)
+                        {
+                            tmpAllowedApparels.AddRange(item.def.requiredApparel[i].AllAllowedApparelForPawn(pawn, ignoreGender: false, includeWorn: true));
+                            tmpRequiredApparels.AddRange(item.def.requiredApparel[i].AllRequiredApparelForPawn(pawn, ignoreGender: false, includeWorn: true));
+                            tmpBodyPartGroupsWithRequirement.AddRange(item.def.requiredApparel[i].bodyPartGroupsMatchAny);
+                        }
+                    }
+                    if (item.def.requiredMinimumApparelQuality > qualityCategory)
+                    {
+                        qualityCategory = item.def.requiredMinimumApparelQuality;
+                    }
+                }
+
+                if (apparel.TryGetQuality(out QualityCategory qc) && qc < qualityCategory)
+                {
+                    score *= 0.25f;
+                }
+
+                bool isRequired = apparel.def.apparel.bodyPartGroups.Any(bp => tmpBodyPartGroupsWithRequirement.Contains(bp));
+                if (isRequired)
+                {
+                    foreach (ThingDef tmpRequiredApparel in tmpRequiredApparels)
+                    {
+                        tmpAllowedApparels.Remove(tmpRequiredApparel);
+                    }
+                    if (tmpAllowedApparels.Contains(apparel.def))
+                    {
+                        score *= 10f;
+                    }
+                    if (tmpRequiredApparels.Contains(apparel.def))
+                    {
+                        score *= 25f;
+                    }
                 }
             }
 
             return score;
         }
 
-        static float ApparelScoreRawPriorities(Pawn pawn, Apparel apparel, ExtendedOutfit outfit)
+        static float ApparelScoreRawPriorities(Apparel apparel, ExtendedOutfit outfit)
         {
-            if (!outfit.StatPriorities.Any()) {
+            if (outfit?.StatPriorities.Any() != true) {
                 return 0f;
             }
 
