@@ -45,7 +45,7 @@ namespace Outfitted
 
             var scores = CachedScoresForPawn(pawn);
 
-            float score = JobGiver_OptimizeApparel.ApparelScoreGain_NewTmp( pawn, apparel, scores);
+            float score = JobGiver_OptimizeApparel.ApparelScoreGain( pawn, apparel, scores);
             if (Math.Abs(score) > 0.01f)
             {
                 var pos = GenMapUI.LabelDrawPosFor(apparel, 0f);
