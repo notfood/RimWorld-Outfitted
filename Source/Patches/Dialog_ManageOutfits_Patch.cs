@@ -37,11 +37,17 @@ namespace Outfitted
                 return;
             }
 
+            float topAreaHeight = Dialog_ManageOutfits.TopAreaHeight + marginTop;
+            if (IsSaveStorageSettingsEnabled)
+            {
+                topAreaHeight += 40;
+            }
+
             Rect canvas = new Rect(
                 marginLeft,
-                Dialog_ManageOutfits.TopAreaHeight + marginTop,
+                topAreaHeight,
                 inRect.xMax - marginLeft - marginRight,
-                inRect.yMax - Dialog_ManageOutfits.TopAreaHeight - marginTop - marginBottom
+                inRect.yMax - topAreaHeight - marginTop - marginBottom
             );
 
             GUI.BeginGroup(canvas);
@@ -380,5 +386,20 @@ namespace Outfitted
 
             return Color.cyan;
         }
+
+        #region Determine whether save storage settings mod is enabled
+        private static bool? isSaveStorageSettingsEnabled = null;
+        internal static bool IsSaveStorageSettingsEnabled
+        {
+            get
+            {
+                if (isSaveStorageSettingsEnabled == null)
+                {
+                    isSaveStorageSettingsEnabled = new bool?(ModLister.GetActiveModWithIdentifier("savestoragesettings.kv.rw") != null);
+                }
+                return isSaveStorageSettingsEnabled.Value;
+            }
+        }
+        #endregion
     }
 }
