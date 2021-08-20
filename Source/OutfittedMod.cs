@@ -13,8 +13,12 @@ namespace Outfitted
     {
         internal static bool showApparelScores;
 
+        internal static bool isSaveStorageSettingsEnabled;
+
         static OutfittedMod()
         {
+            isSaveStorageSettingsEnabled = ModLister.GetActiveModWithIdentifier("savestoragesettings.kv.rw") != null;
+
             new Harmony("rimworld.outfitted").PatchAll();
         }
 

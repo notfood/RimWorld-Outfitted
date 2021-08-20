@@ -37,11 +37,17 @@ namespace Outfitted
                 return;
             }
 
+            float topAreaHeight = Dialog_ManageOutfits.TopAreaHeight + marginTop;
+            if (OutfittedMod.isSaveStorageSettingsEnabled)
+            {
+                topAreaHeight += 40;
+            }
+
             Rect canvas = new Rect(
                 marginLeft,
-                Dialog_ManageOutfits.TopAreaHeight + marginTop,
+                topAreaHeight,
                 inRect.xMax - marginLeft - marginRight,
-                inRect.yMax - Dialog_ManageOutfits.TopAreaHeight - marginTop - marginBottom
+                inRect.yMax - topAreaHeight - marginTop - marginBottom
             );
 
             GUI.BeginGroup(canvas);
