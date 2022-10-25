@@ -30,10 +30,10 @@ namespace Outfitted
                 MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.targetTemperatures)),
                 MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.PenaltyWornByCorpse)),
                 MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.AutoWorkPriorities)),
-                MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.AutoTemp)),
                 MP.RegisterSyncField (typeof(ExtendedOutfit), nameof(ExtendedOutfit.autoTempOffset)),
             };
 
+            MP.RegisterSyncMethod(typeof(ExtendedOutfit), nameof(ExtendedOutfit.AutoTemp));
             MP.RegisterSyncMethod(typeof(ExtendedOutfit), nameof(ExtendedOutfit.AddStatPriority));
             MP.RegisterSyncMethod(typeof(ExtendedOutfit), nameof(ExtendedOutfit.RemoveStatPriority));
             MP.RegisterSyncMethod(typeof(ExtendedOutfit), nameof(ExtendedOutfit.CopyFrom));
