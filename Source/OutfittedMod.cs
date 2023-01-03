@@ -45,26 +45,27 @@ namespace Outfitted
             new CurvePoint( 20f, 3f )
         };
 
-        public static float ApparelScoreRaw(Pawn pawn, Apparel apparel, NeededWarmth neededWarmth = NeededWarmth.Any)
+        public static float ApparelScoreExtra(Pawn pawn, Apparel apparel, NeededWarmth neededWarmth)
         {
-            var outfit = pawn?.outfits?.CurrentOutfit as ExtendedOutfit;
-            if (pawn != null && outfit == null)
+            var outfit = pawn.outfits.CurrentOutfit as ExtendedOutfit;
+            if (outfit == null)
             {
                 Log.ErrorOnce("Outfitted :: Not an ExtendedOutfit, something went wrong.", 399441);
                 return 0f;
             }
 
-            float score = 0.1f + ApparelScoreRawPriorities(apparel, outfit);
+            float score = 0.1f + apparel.def.apparel.scoreOffset;
 
-            if (pawn != null && outfit?.AutoWorkPriorities == true)
+            score += ApparelScoreRawPriorities(apparel, outfit);
+
+            if (outfit.AutoWorkPriorities == true)
             {
                 score += ApparelScoreAutoWorkPriorities( pawn, apparel );
             }
 
             if (apparel.def.useHitPoints)
             {
-                float x = (float)apparel.HitPoints / apparel.MaxHitPoints;
-                score *= HitPointsPercentScoreFactorCurve.Evaluate(x);
+                score *= HitPointsPercentScoreFactorCurve.Evaluate((float) apparel.HitPoints / (float) apparel.MaxHitPoints);
             }
 
             score += apparel.GetSpecialApparelScoreOffset();
@@ -72,87 +73,20 @@ namespace Outfitted
             if (pawn != null && outfit != null)
                 score += ApparelScoreRawInsulation(pawn, apparel, outfit, neededWarmth);
 
-            if (pawn?.def?.race?.Animal == false)
+            if (outfit.PenaltyWornByCorpse && apparel.WornByCorpse && ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel, true))
             {
-                if (outfit?.PenaltyWornByCorpse == true && apparel.WornByCorpse && ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.DeadMansApparel, true))
+                score -= 0.5f;
+                if (score > 0f)
                 {
-                    score -= 0.5f;
-                    if (score > 0f)
-                    {
-                        score *= 0.1f;
-                    }
-                }
-
-                if (apparel.Stuff == ThingDefOf.Human.race.leatherDef)
-                {
-                    if (ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelSad, true))
-                    {
-                        score -= 0.5f;
-                        if (score > 0f)
-                        {
-                            score *= 0.1f;
-                        }
-                    }
-                    if (ThoughtUtility.CanGetThought(pawn, ThoughtDefOf.HumanLeatherApparelHappy, true))
-                    {
-                        score += 0.12f;
-                    }
+                    score *= 0.1f;
                 }
             }
-
-            //royalty titles
-            if (pawn?.royalty?.AllTitlesInEffectForReading?.Count > 0)
-            {
-                HashSet<ThingDef> tmpAllowedApparels = new HashSet<ThingDef>();
-                HashSet<ThingDef> tmpRequiredApparels = new HashSet<ThingDef>();
-                HashSet<BodyPartGroupDef> tmpBodyPartGroupsWithRequirement = new HashSet<BodyPartGroupDef>();
-                QualityCategory qualityCategory = QualityCategory.Awful;
-                foreach (RoyalTitle item in pawn.royalty.AllTitlesInEffectForReading)
-                {
-                    if (item.def.requiredApparel != null)
-                    {
-                        for (int i = 0; i < item.def.requiredApparel.Count; i++)
-                        {
-                            tmpAllowedApparels.AddRange(item.def.requiredApparel[i].AllAllowedApparelForPawn(pawn, ignoreGender: false, includeWorn: true));
-                            tmpRequiredApparels.AddRange(item.def.requiredApparel[i].AllRequiredApparelForPawn(pawn, ignoreGender: false, includeWorn: true));
-                            tmpBodyPartGroupsWithRequirement.AddRange(item.def.requiredApparel[i].bodyPartGroupsMatchAny);
-                        }
-                    }
-                    if (item.def.requiredMinimumApparelQuality > qualityCategory)
-                    {
-                        qualityCategory = item.def.requiredMinimumApparelQuality;
-                    }
-                }
-
-                if (apparel.TryGetQuality(out QualityCategory qc) && qc < qualityCategory)
-                {
-                    score *= 0.25f;
-                }
-
-                bool isRequired = apparel.def.apparel.bodyPartGroups.Any(bp => tmpBodyPartGroupsWithRequirement.Contains(bp));
-                if (isRequired)
-                {
-                    foreach (ThingDef tmpRequiredApparel in tmpRequiredApparels)
-                    {
-                        tmpAllowedApparels.Remove(tmpRequiredApparel);
-                    }
-                    if (tmpAllowedApparels.Contains(apparel.def))
-                    {
-                        score *= 10f;
-                    }
-                    if (tmpRequiredApparels.Contains(apparel.def))
-                    {
-                        score *= 25f;
-                    }
-                }
-            }
-
             return score;
         }
 
         static float ApparelScoreRawPriorities(Apparel apparel, ExtendedOutfit outfit)
         {
-            if (outfit?.StatPriorities.Any() != true) {
+            if (!outfit.StatPriorities.Any()) {
                 return 0f;
             }
 
@@ -266,6 +200,15 @@ namespace Outfitted
             var insulationHeat = apparel.GetStatValue(StatDefOf.Insulation_Heat);
 
             return new FloatRange(-insulationCold, insulationHeat);
+        }
+
+        internal static void Notify_OutfitChanged(int id)
+        {
+            var affected = PawnsFinder.AllMaps_SpawnedPawnsInFaction(Faction.OfPlayer)
+                .Where(i => i.outfits.CurrentOutfit.uniqueId == id);
+            foreach (var pawn in affected) {
+                pawn.mindState?.Notify_OutfitChanged();
+            }
         }
     }
 }

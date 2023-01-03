@@ -114,7 +114,9 @@ namespace Outfitted
             targetTemperatures = outfit.targetTemperatures;
             PenaltyWornByCorpse = outfit.PenaltyWornByCorpse;
             statPriorities.Clear();
-            statPriorities.AddRange(outfit.statPriorities);
+            foreach(var sp in outfit.statPriorities) {
+                statPriorities.Add(new StatPriority(sp.Stat, sp.Weight, sp.Default));
+            }
             AutoWorkPriorities = outfit.AutoWorkPriorities;
             _autoTemp = outfit._autoTemp;
             autoTempOffset = outfit.autoTempOffset;

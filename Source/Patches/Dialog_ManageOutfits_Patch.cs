@@ -74,11 +74,7 @@ namespace Outfitted
             if (MP.IsInMultiplayer) {
                 MP.WatchEnd ();
             } else if (GUI.changed) {
-                var affected = Find.CurrentMap.mapPawns.FreeColonists
-                                   .Where(i => i.outfits.CurrentOutfit == selectedOutfit);
-                foreach (var pawn in affected) {
-                    pawn.mindState?.Notify_OutfitChanged();
-                }
+                OutfittedMod.Notify_OutfitChanged(selectedOutfit.uniqueId);
             }
 
             GUI.EndGroup();
@@ -131,7 +127,9 @@ namespace Outfitted
             var autoTemp = outfit.AutoTemp;
             Widgets.CheckboxLabeled(rect, ResourceBank.Strings.AutoTemp,
                                      ref autoTemp);
-            outfit.AutoTemp = autoTemp;
+            if (autoTemp != outfit.AutoTemp) {
+                outfit.AutoTemp = autoTemp;
+            }
             TooltipHandler.TipRegion(rect, ResourceBank.Strings.AutoTempTooltip);
             pos.y += rect.height;
         }

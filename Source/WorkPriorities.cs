@@ -43,7 +43,7 @@ namespace Outfitted
             // normalize worktype priorities;
             // 1 - get the range (usually within 1-4, but may be up to 1-9 with Work Tab)
             var range = new IntRange( worktypeStats.Min( s => s.priority ), worktypeStats.Max( s => s.priority ) );
-            var weights = new Dictionary<StatDef,StatPriority>();
+            var weights = new List<StatPriority>();
             var sumOfWeights = 0f;
 
 
@@ -56,13 +56,12 @@ namespace Outfitted
                     : 1 - ( worktype.priority - range.min ) / ( range.max - range.min );
                 foreach ( var weight in worktype.weights )
                 {
-                    StatPriority statPriority;
-                    if ( weights.TryGetValue( weight.Stat, out statPriority ) )
-                    {
+                    StatPriority statPriority = weights.FirstOrDefault(sp => sp.Stat == weight.Stat);
+                    if ( statPriority != null ) {
                         statPriority.Weight += normalizedPriority * weight.Weight;
                     } else {
                         statPriority = new StatPriority( weight.Stat, normalizedPriority * weight.Weight );
-                        weights.Add( weight.Stat, statPriority );
+                        weights.Add( statPriority );
                     }
 
                     sumOfWeights += statPriority.Weight;
@@ -71,10 +70,10 @@ namespace Outfitted
 
             // 4 - multiply weights by constant c, so that sum of weights is 10
             if ( weights.Any() && sumOfWeights != 0 )
-                foreach ( var weight in weights )
-                    weight.Value.Weight *= 10 / sumOfWeights;
+                foreach ( var statPriority in weights )
+                    statPriority.Weight *= 10 / sumOfWeights;
 
-            return weights.Values.ToList();
+            return weights;
         }
 
         public static List<StatPriority> WorktypeStatPriorities( WorkTypeDef worktype )

@@ -9,8 +9,9 @@ namespace Outfitted
     [HarmonyPatch(typeof(Thing), nameof(Thing.DrawGUIOverlay))]
     static class Thing_DrawGUIOverlay_Patch
     {
-        static int cachedId;
-        static List<float> cachedScores;
+        static int cachedId = -1;
+        static int cachedTick = -1;
+        static List<float> cachedScores = new List<float>();
 
         static void Postfix(Thing __instance)
         {
@@ -45,7 +46,7 @@ namespace Outfitted
 
             var scores = CachedScoresForPawn(pawn);
 
-            float score = JobGiver_OptimizeApparel.ApparelScoreGain( pawn, apparel, scores);
+            float score = JobGiver_OptimizeApparel.ApparelScoreGain(pawn, apparel, scores);
             if (Math.Abs(score) > 0.01f)
             {
                 var pos = GenMapUI.LabelDrawPosFor(apparel, 0f);
@@ -55,9 +56,10 @@ namespace Outfitted
 
         static List<float> CachedScoresForPawn(Pawn pawn)
         {
-            if (cachedId != pawn.thingIDNumber) {
+            if (cachedId != pawn.thingIDNumber || cachedTick < GenTicks.TicksGame) {
                 cachedScores = ScoresForPawn(pawn);
                 cachedId = pawn.thingIDNumber;
+                cachedTick = GenTicks.TicksGame;
             }
 
             return cachedScores;
@@ -68,7 +70,7 @@ namespace Outfitted
             var wornApparelScores = new List<float>();
             for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
             {
-                wornApparelScores.Add(OutfittedMod.ApparelScoreRaw(pawn, pawn.apparel.WornApparel[i]));
+                wornApparelScores.Add(JobGiver_OptimizeApparel.ApparelScoreRaw(pawn, pawn.apparel.WornApparel[i]));
             }
             return wornApparelScores;
         }
